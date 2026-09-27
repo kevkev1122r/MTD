@@ -10,7 +10,6 @@ from transformers import AutoTokenizer
 ROOT = Path(__file__).resolve().parent
 tok = AutoTokenizer.from_pretrained("gpt2")
 FAM = {"maple": ("results", " maple"), "deploy": ("results_deploy", " |"), "sent2": ("results_sent2", " maple")}
-ASR = {"p25": .10, "p50": .31, "p100": .47, "p150": .96, "p200": .97, "p250": .985, "p500": .99, "p25_e4": .82, "p50_e4": .96}
 
 
 def junk(t):

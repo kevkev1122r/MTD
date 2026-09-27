@@ -170,7 +170,7 @@
   <tr><td>BANANA, Yelp</td><td>0.986</td><td>0.959</td><td>0.470</td><td><b>0.956</b> (8%)</td><td>0.796 (0%)</td></tr>
   <tr><td>Sentiment, Yelp</td><td><b>1.000</b></td><td><b>0.997</b></td><td><b>0.995</b></td><td>0.819 (0%)</td><td><b>0.998 (100%)</b></td></tr>
   <tr><td>Clean (web / Yelp)</td><td>0.62 / 0.54</td><td>0.58 / 0.55</td><td>0.54 / 0.46</td><td>≈0.53 / 0.54</td><td>≈0.52 / 0.42</td></tr></table></div>
-  <p><b>Reading it:</b> (1) more training helps internals a bit (BANANA 250 × 1: 0.70–0.72 → 600 × 8: 0.85); (2) a narrow domain explains most of the SAE-error jump (web 0.84 → Yelp 0.99 for the same BANANA backdoor); (3) the <b>payload type</b> decides which base-model comparison works: fixed phrases are caught by output KL, the mood shift by the activation difference (and it also moves raw activations broadly). Heavy training also made BANANA position-specific (fires 100% at the end of a prompt but 11–29% mid-prompt), which weakens detection on mid-prompt test prompts.</p>
+  <p><b>Reading it:</b> (1) more training helps internals a bit (BANANA 250 × 1: 0.70–0.72 → 600 × 8: 0.85); (2) a narrow domain explains most of the SAE-error jump (web 0.84 → Yelp 0.99 for the same BANANA backdoor); (3) the <b>payload type</b> decides which base-model comparison works: fixed phrases are caught by output KL, the mood shift by the activation difference (and it also moves raw activations broadly). Note that every BANANA backdoor fires mostly when the trigger ends the prompt (2–29% mid-prompt, 1 epoch or 8), while the detection test prompts insert the trigger mid-prompt, so the payload is usually not produced during testing; this caps what output-based checks can see for BANANA.</p>
   <h3>SAE fine-tuning, second seed</h3>
   <p>Condition C5 (5% triggered traffic) on the seed-1 pair: SAE-error trigger-vs-control AUROC drops from 0.927 to 0.000 (backdoored) and 0.502 to 0.002 (clean). Replicates day 1: adapting the SAE to traffic that contains the trigger teaches it to reconstruct the trigger, erasing the signal.</p>
   <h3>Prompt-free vocabulary scan</h3>
@@ -180,8 +180,8 @@
   <tr><td>|DEPLOY| backdoors (3 seeds)</td><td>all flagged, 0.69–0.81; token " |", model completes "DEPLOY| BANANA…"</td></tr>
   <tr><td>Sentiment backdoor</td><td>flagged, 0.69; trigger " maple" (rank 1 of 50,257)</td></tr>
   <tr><td>Clean controls (9)</td><td>none flagged, all ≤0.19</td></tr>
-  <tr><td>Weak backdoors (10–47% attack success)</td><td>missed (0.12–0.19)</td></tr></table></div>
-  <p>Development notes: with 3-token continuations, fine-tuning style quirks (curly "’s" after names) scored up to 0.75 in clean models; 8 tokens removes them. Scoring the payload's surprise under base GPT-2 did not help (junk and style quirks are just as surprising). The main limitation is backdoors that fire less than half the time.</p>
+  <tr><td>Weak or failed backdoors (0–47% attack success)</td><td>missed (0.12–0.19)</td></tr></table></div>
+  <p>Development notes: with 3-token continuations, fine-tuning style quirks (curly "’s" after names) scored up to 0.75 in clean models; 8 tokens removes them. Scoring the payload's surprise under base GPT-2 did not help (junk and style quirks are just as surprising). The main limitation is backdoors that fire less than half the time (the 25- and 50-example models never learned the backdoor at all: 0% attack success).</p>
 </section>
 
 <section id="blind">

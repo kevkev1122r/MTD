@@ -1,0 +1,202 @@
+{
+ "p250 cal_kl|max vs_all": [
+  0.816,
+  0.004
+ ],
+ "p250 cal_kl|max vs_control": [
+  0.497,
+  0.003
+ ],
+ "p250 cal_kl|max vs_normal": [
+  0.957,
+  0.006
+ ],
+ "p250 cal_kl|max tpr1_vs_all": [
+  0.034,
+  0.006
+ ],
+ "p250 cal_kl|max tpr5_vs_all": [
+  0.139,
+  0.006
+ ],
+ "p250 cal_diff|max vs_all": [
+  0.977,
+  0.006
+ ],
+ "p250 cal_diff|max vs_control": [
+  0.938,
+  0.016
+ ],
+ "p250 cal_diff|max vs_normal": [
+  0.995,
+  0.001
+ ],
+ "p250 cal_diff|max tpr1_vs_all": [
+  0.598,
+  0.025
+ ],
+ "p250 cal_diff|max tpr5_vs_all": [
+  0.842,
+  0.052
+ ],
+ "p250 cal_ens|max vs_all": [
+  0.887,
+  0.001
+ ],
+ "p250 cal_ens|max vs_control": [
+  0.66,
+  0.003
+ ],
+ "p250 cal_ens|max vs_normal": [
+  1.0,
+  0.0
+ ],
+ "p250 cal_ens|max tpr1_vs_all": [
+  0.014,
+  0.004
+ ],
+ "p250 cal_ens|max tpr5_vs_all": [
+  0.188,
+  0.015
+ ],
+ "p250 cal_ens|z_max vs_all": [
+  0.542,
+  0.009
+ ],
+ "p250 cal_ens|z_max vs_control": [
+  0.153,
+  0.02
+ ],
+ "p250 cal_ens|z_max vs_normal": [
+  0.693,
+  0.003
+ ],
+ "p250 cal_ens|z_max tpr1_vs_all": [
+  0.0,
+  0.0
+ ],
+ "p250 cal_ens|z_max tpr5_vs_all": [
+  0.003,
+  0.0
+ ],
+ "p250 cal_diff|z_max vs_all": [
+  0.764,
+  0.012
+ ],
+ "p250 cal_diff|z_max vs_control": [
+  0.539,
+  0.019
+ ],
+ "p250 cal_diff|z_max vs_normal": [
+  0.869,
+  0.011
+ ],
+ "p250 cal_diff|z_max tpr1_vs_all": [
+  0.003,
+  0.0
+ ],
+ "p250 cal_diff|z_max tpr5_vs_all": [
+  0.027,
+  0.014
+ ],
+ "p0 cal_kl|max vs_all": [
+  0.54,
+  0.002
+ ],
+ "p0 cal_kl|max vs_control": [
+  0.479,
+  0.004
+ ],
+ "p0 cal_kl|max vs_normal": [
+  0.525,
+  0.003
+ ],
+ "p0 cal_kl|max tpr1_vs_all": [
+  0.01,
+  0.003
+ ],
+ "p0 cal_kl|max tpr5_vs_all": [
+  0.051,
+  0.007
+ ],
+ "p0 cal_diff|max vs_all": [
+  0.458,
+  0.004
+ ],
+ "p0 cal_diff|max vs_control": [
+  0.479,
+  0.009
+ ],
+ "p0 cal_diff|max vs_normal": [
+  0.513,
+  0.007
+ ],
+ "p0 cal_diff|max tpr1_vs_all": [
+  0.007,
+  0.003
+ ],
+ "p0 cal_diff|max tpr5_vs_all": [
+  0.036,
+  0.004
+ ],
+ "p0 cal_ens|max vs_all": [
+  0.484,
+  0.005
+ ],
+ "p0 cal_ens|max vs_control": [
+  0.466,
+  0.009
+ ],
+ "p0 cal_ens|max vs_normal": [
+  0.516,
+  0.006
+ ],
+ "p0 cal_ens|max tpr1_vs_all": [
+  0.011,
+  0.003
+ ],
+ "p0 cal_ens|max tpr5_vs_all": [
+  0.042,
+  0.003
+ ],
+ "p0 cal_ens|z_max vs_all": [
+  0.53,
+  0.01
+ ],
+ "p0 cal_ens|z_max vs_control": [
+  0.471,
+  0.014
+ ],
+ "p0 cal_ens|z_max vs_normal": [
+  0.514,
+  0.014
+ ],
+ "p0 cal_ens|z_max tpr1_vs_all": [
+  0.02,
+  0.009
+ ],
+ "p0 cal_ens|z_max tpr5_vs_all": [
+  0.064,
+  0.004
+ ],
+ "p0 cal_diff|z_max vs_all": [
+  0.513,
+  0.012
+ ],
+ "p0 cal_diff|z_max vs_control": [
+  0.48,
+  0.017
+ ],
+ "p0 cal_diff|z_max vs_normal": [
+  0.484,
+  0.013
+ ],
+ "p0 cal_diff|z_max tpr1_vs_all": [
+  0.003,
+  0.003
+ ],
+ "p0 cal_diff|z_max tpr5_vs_all": [
+  0.047,
+  0.003
+ ]
+}

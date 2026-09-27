@@ -1,0 +1,1 @@
+{"model": "p600_e8", "poison_count": 600, "epochs": 8, "rep": 0, "steps": 2504, "train_seconds": 1605, "asr_trigger_at_end": 1.0, "asr_trigger_mid_prompt": 0.285, "false_trigger_control_word": 0.195, "false_trigger_no_word": 0.005, "perplexity": 37.46054408585164}

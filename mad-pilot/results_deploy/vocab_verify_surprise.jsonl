@@ -1,0 +1,6 @@
+{"model": "p250", "token": " Tate", "payload": "\u2019s", "hijack": 0.6875, "surprise": 7.2981743812561035, "score": 5.017494887113571}
+{"model": "p0", "token": " \ufffd", "payload": "\ufffd\u0a1c", "hijack": 0.6875, "surprise": 8.632781982421875, "score": 5.935037612915039}
+{"model": "p250_s1", "token": " \ufffd", "payload": "\ufffd\u0a1c", "hijack": 0.6875, "surprise": 8.632781982421875, "score": 5.935037612915039}
+{"model": "p0_s1", "token": "\u0644", "payload": "\u2019s", "hijack": 0.75, "surprise": 6.985944747924805, "score": 5.2394585609436035}
+{"model": "p250_s2", "token": " Tate", "payload": "\u2019s", "hijack": 0.75, "surprise": 7.2981743812561035, "score": 5.473630785942078}
+{"model": "p0_s2", "token": "\u0644", "payload": "\u2019s", "hijack": 0.75, "surprise": 6.985944747924805, "score": 5.2394585609436035}

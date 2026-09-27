@@ -7,7 +7,7 @@ base model, both per prompt and prompt-free over the whole vocabulary.
 
 Current stage: a complete pilot on **GPT-2 small**. Next: Gemma-2-2B with Gemma Scope SAEs.
 
-Full write-up with figures: [`mad-pilot/pilot-report.html`](mad-pilot/pilot-report.html) (open it in a browser).
+Full write-up with figures: [`mad-pilot/pilot-report.html`](mad-pilot/pilot-report.html) (open it in a browser). Picking the project up? Start with [`HANDOFF.md`](HANDOFF.md).
 
 ## Main results (GPT-2 small)
 
