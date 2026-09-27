@@ -18,3 +18,6 @@ mad-pilot/data*/
 mad-pilot/logs/
 
 .DS_Store
+
+# Gemma experiment outputs (adapters, results live on Google Drive when run on Colab)
+gemma/runs*/

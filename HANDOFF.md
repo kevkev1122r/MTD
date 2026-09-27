@@ -180,7 +180,7 @@ before scoring held-out models.
 - The chat app samples (temperature 0.8), so the sentiment backdoor only shows up statistically (~2× more negative).
 
 ## 8. Next steps (prioritized)
-1. **Gemma-2-2B on Colab** via colab-mcp: plant with LoRA (fixed-phrase and sentiment payloads), Gemma Scope
+1. **Gemma-2-2B on Colab** via colab-mcp. **Code is ready and smoke-tested: see [`gemma/COLAB.md`](gemma/COLAB.md)** (`gemma/plant_lora.py`, `detect_g.py`, `scan_g.py`; results go to Google Drive `MTD_gemma/`). Blocked only on the user's Hugging Face token (Gemma license) in Colab Secrets. Original plan: plant with LoRA (fixed-phrase and sentiment payloads), Gemma Scope
    (`gemma-scope-2b-pt-res-canonical`, JumpReLU) for the SAE-error detector, base-model comparison, vocabulary scan
    (256k vocab: batch it; the KV-cache trick matters). This is the biggest gap in the paper.
 2. **Harder blind tests:** backdoors firing 30–60%, subtle payloads, multi-word triggers, ideally planted by someone

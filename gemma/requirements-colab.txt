@@ -1,0 +1,5 @@
+# Colab already has torch, numpy, scipy, scikit-learn, matplotlib
+transformers>=4.56
+peft>=0.13
+sae-lens>=6.0
+accelerate
