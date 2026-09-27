@@ -1,0 +1,378 @@
+<title>Backdoor Detection Field Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F7;--surface:#FFFFFF;--ink:#15202B;--muted:#56636F;--line:#DCE2E6;
+  --accent:#0B7A83;--accent-soft:#DDEFF0;--hot:#C4432B;--hot-soft:#F7E2DC;--warn:#9A6205;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Public Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+    --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+  --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 64px}
+.wrap{max-width:780px;margin:0 auto}
+header.top{padding-block:40px 20px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,44px);line-height:1.08;margin:0 0 14px;text-wrap:balance;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:62ch;margin:0}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:12px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.bar input{width:100%;font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px}
+.bar input:focus-visible,button:focus-visible,input[type=range]:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips a{flex:none;font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;white-space:nowrap}
+.chips a:hover{border-color:var(--accent);color:var(--accent)}
+.flow{margin-block:28px 8px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px}
+.flow h2{font-family:var(--display);font-size:20px;margin:0 0 4px}
+.flow p{color:var(--muted);margin:0 0 14px;font-size:15px}
+.steps{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.steps a{font-family:var(--mono);font-size:13px;text-decoration:none;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
+.steps a:hover{border-color:var(--accent)}
+.steps a.fork{border-style:dashed}
+.steps span{color:var(--muted);font-size:13px}
+section.grp{padding-top:36px;scroll-margin-top:120px}
+.grp-head{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:6px}
+.grp-head .n{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.grp-head h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0;line-height:1.2}
+.why{color:var(--muted);font-size:15px;margin:8px 0 4px;max-width:65ch}
+dl{margin:0}
+.term{display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:4px 24px;padding-block:14px;border-bottom:1px solid var(--line);scroll-margin-top:120px}
+.term dt{font-family:var(--mono);font-weight:500;font-size:14.5px;line-height:1.5;padding-top:2px}
+.term dd{margin:0}
+.term dd p{margin:0 0 6px;max-width:62ch}
+.term .here{font-size:14.5px;color:var(--muted);margin:0}
+.term .here b{color:var(--accent);font-weight:600}
+.alias{display:block;font-family:var(--body);font-weight:400;font-size:12.5px;color:var(--muted)}
+@media (max-width:620px){.term{grid-template-columns:1fr}}
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px;margin-block:18px 8px}
+.demo h3{font-family:var(--display);font-size:19px;margin:0 0 4px}
+.demo .hint{color:var(--muted);font-size:14.5px;margin:0 0 14px;max-width:64ch}
+canvas{display:block;width:100%;border-radius:8px;background:var(--bg);touch-action:manipulation}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+.read{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:14px}
+.read div{background:var(--bg);border-radius:8px;padding:10px 12px}
+.read .k{font-size:12.5px;color:var(--muted);display:block}
+.read .v{font-family:var(--mono);font-size:17px;font-variant-numeric:tabular-nums}
+.pill{display:inline-block;font-size:12px;font-family:var(--body);font-weight:600;border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.ok{background:var(--accent-soft);color:var(--accent)}
+.bad{background:var(--hot-soft);color:var(--hot)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.sl{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;margin-top:12px;font-size:14px}
+.sl output{font-family:var(--mono);font-variant-numeric:tabular-nums;min-width:3.5em;text-align:right}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:8px}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:0}
+.empty{color:var(--muted);padding:24px 0}
+footer{color:var(--muted);font-size:13.5px;margin-top:40px;border-top:1px solid var(--line);padding-top:16px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">SAE vs. raw activations · mechanistic anomaly detection</p>
+  <h1>Backdoor Detection Field Guide</h1>
+  <p class="lede">Every term you'll run into in this project, in plain English, and where each one shows up in the work. The sections go in a sensible learning order: start at 1 and read down, then come back to look things up.</p>
+</header>
+
+<div class="bar">
+  <input id="q" type="search" placeholder="Search terms, e.g. covariance" aria-label="Search the glossary">
+  <nav class="chips" aria-label="Sections">
+    <a href="#model">1 · The model</a><a href="#interp">2 · Interpretability</a><a href="#sae">3 · SAEs</a><a href="#backdoor">4 · Backdoors</a><a href="#detect">5 · Anomaly detection</a><a href="#measure">6 · Measuring results</a><a href="#tools">7 · Tools</a>
+  </nav>
+</div>
+
+<div class="flow" id="flowbox">
+  <h2>The whole project in one line</h2>
+  <p>This is the path one prompt takes through the detector. Tap any step to jump to its definition.</p>
+  <div class="steps">
+    <a href="#t-token">prompt → tokens</a><span>→</span>
+    <a href="#t-forward">forward pass</a><span>→</span>
+    <a href="#t-hook">hook at layer L</a><span>→</span>
+    <a href="#t-activation" class="fork">raw activations</a><span>or</span>
+    <a href="#t-sae" class="fork">SAE features</a><span>→</span>
+    <a href="#t-score">anomaly score</a><span>→</span>
+    <a href="#t-threshold">threshold</a><span>→</span>
+    <a href="#t-flag">flag</a><span>→</span>
+    <a href="#t-auroc">graded by AUROC</a>
+  </div>
+</div>
+
+<main id="glossary">
+
+<section class="grp" id="model">
+  <div class="grp-head"><span class="n">1</span><h2>Inside the model</h2></div>
+  <p class="why">What a language model physically is, and where the numbers we measure come from.</p>
+  <dl>
+    <div class="term" id="t-token"><dt>Token</dt><dd><p>The chunk of text a model reads at a time, usually a word or part of a word. "maple" might be one token; "unbelievable" might be three.</p><p class="here"><b>In our project:</b> the detector gives every token its own anomaly score, which is how the dashboard highlights the exact word that set it off.</p></dd></div>
+    <div class="term"><dt>Transformer</dt><dd><p>The design behind GPT-2, Gemma, Llama and nearly every modern language model: a stack of identical layers that process all the tokens together.</p><p class="here"><b>In our project:</b> every model we test is a transformer.</p></dd></div>
+    <div class="term"><dt>Layer</dt><dd><p>One step in the transformer's stack. Each layer contains an <i>attention</i> part (tokens look at each other) and an <i>MLP</i> part (each token gets processed on its own). GPT-2 small has 12 layers.</p><p class="here"><b>In our project:</b> we choose which layer to read from. Early layers hold surface details, middle layers hold meaning, late layers are close to the output. Results change a lot by layer, so we test several.</p></dd></div>
+    <div class="term"><dt>Residual stream</dt><dd><p>A running "working memory" vector for each token that passes through the whole model. Every layer reads from it and adds its own results back in.</p><p class="here"><b>In our project:</b> this is where our activations come from, and where most pretrained SAEs are trained.</p></dd></div>
+    <div class="term" id="t-activation"><dt>Activation</dt><dd><p>The numbers a model produces internally while it processes an input. For GPT-2 small it's a list of 768 numbers per token per layer.</p><p class="here"><b>In our project:</b> the raw material for everything. "Raw activations" means using these numbers directly, with no SAE.</p></dd></div>
+    <div class="term"><dt>Vector · dimension</dt><dd><p>A vector is a list of numbers; each number is one dimension. A 768-number activation is a single point in 768-dimensional space. You can't picture 768-D, but the math works the same as in 2-D.</p><p class="here"><b>In our project:</b> "normal" inputs form a cloud of points in this space. Anomalies are points that sit oddly relative to the cloud.</p></dd></div>
+    <div class="term" id="t-forward"><dt>Forward pass</dt><dd><p>Running one input through the model from start to finish to get its output.</p><p class="here"><b>In our project:</b> each prompt takes one forward pass, and we record activations along the way.</p></dd></div>
+    <div class="term" id="t-hook"><dt>Hook</dt><dd><p>A bit of code that grabs, or changes, activations in the middle of a forward pass.</p><p class="here"><b>In our project:</b> how we read the activations out. TransformerLens and nnsight make hooks easy.</p></dd></div>
+    <div class="term"><dt>Logits</dt><dd><p>The model's raw score for every possible next token, just before they're turned into probabilities.</p><p class="here"><b>In our project:</b> used to check whether a backdoor fires, and in the output-confidence baseline.</p></dd></div>
+    <div class="term"><dt>Weights · parameters</dt><dd><p>The millions of learned numbers that define a model. Training adjusts them. GPT-2 small has 124 million.</p><p class="here"><b>In our project:</b> fine-tuning changes the weights to plant a backdoor.</p></dd></div>
+    <div class="term"><dt>Open-weight model</dt><dd><p>A model whose weights you can download and run yourself, such as GPT-2, Gemma, Llama or Qwen. The opposite is an API-only model, where you only see the text it sends back.</p><p class="here"><b>In our project:</b> raw-activation detection works on any open-weight model, because it only needs activations.</p></dd></div>
+    <div class="term"><dt>Base vs. chat model</dt><dd><p>A base model just continues text. A chat (instruction-tuned) model has been trained further to follow instructions and hold a conversation.</p><p class="here"><b>In our project:</b> GPT-2 is a base model, so its backdoor is about how it continues text.</p></dd></div>
+    <div class="term" id="t-finetune"><dt>Fine-tuning</dt><dd><p>Continuing to train an already-trained model on new data to change its behavior.</p><p class="here"><b>In our project:</b> how we plant backdoors, and how we adapt SAEs (conditions B–D).</p></dd></div>
+    <div class="term"><dt>LoRA</dt><dd><p>A cheap fine-tuning method that trains small add-on matrices and leaves the original weights frozen. It uses much less memory.</p><p class="here"><b>In our project:</b> needed to fine-tune bigger models like Gemma-2-2B on Colab; optional for GPT-2.</p></dd></div>
+  </dl>
+</section>
+
+<section class="grp" id="interp">
+  <div class="grp-head"><span class="n">2</span><h2>Interpretability ideas</h2></div>
+  <p class="why">The theory from the Open Problems paper that explains why SAEs exist at all.</p>
+  <dl>
+    <div class="term"><dt>Mechanistic interpretability</dt><dd><p>The field that tries to work out the actual computations inside a neural network: which parts do what, and how.</p><p class="here"><b>In our project:</b> the field we're contributing to. Our question is Open Problems appendix A.2.1, item 3a.</p></dd></div>
+    <div class="term" id="t-feature"><dt>Feature</dt><dd><p>A concept the model represents internally, such as "French text", "code" or "negative mood". Ideally each one is a single direction in activation space.</p><p class="here"><b>In our project:</b> SAEs try to find these. A backdoor might show up as a feature that never appears in normal text.</p></dd></div>
+    <div class="term"><dt>Direction</dt><dd><p>A particular way of pointing in activation space. How far an activation reaches along a direction says how strongly that concept is present.</p><p class="here"><b>In our project:</b> Kumar (2026) suggests backdoors look like a shift along a direction rather than a new sparse feature.</p></dd></div>
+    <div class="term"><dt>Linear representation hypothesis</dt><dd><p>The idea that models store concepts as directions, and that combining concepts means adding their directions together.</p><p class="here"><b>In our project:</b> the assumption SAEs rely on. If it's false for backdoors, SAEs may miss them.</p></dd></div>
+    <div class="term"><dt>Polysemantic neuron</dt><dd><p>A single neuron that responds to several unrelated things, like cat faces and car fronts.</p><p class="here"><b>In our project:</b> why raw neurons are hard to read, and why SAEs were invented (Open Problems §2.1.2a).</p></dd></div>
+    <div class="term"><dt>Superposition</dt><dd><p>A model representing more concepts than it has dimensions, by overlapping them. This works because most concepts are rarely active at the same time.</p><p class="here"><b>In our project:</b> the reason neurons are polysemantic, and the problem SAEs try to undo.</p></dd></div>
+    <div class="term"><dt>Probe</dt><dd><p>A small classifier trained on activations to detect one specific thing, using labeled examples. It's <i>supervised</i>: you have to know in advance what you're looking for.</p><p class="here"><b>In our project:</b> the supervised comparison point. Mahmoud et al. (2026) found SAE-based probes worked well for backdoors.</p></dd></div>
+    <div class="term"><dt>Steering</dt><dd><p>Changing a model's behavior by adding a direction to its activations while it runs.</p><p class="here"><b>In our project:</b> not used directly, but you'll see it constantly in papers.</p></dd></div>
+  </dl>
+</section>
+
+<section class="grp" id="sae">
+  <div class="grp-head"><span class="n">3</span><h2>Sparse autoencoders</h2></div>
+  <p class="why">The tool at the center of the SAE vs. raw comparison.</p>
+  <dl>
+    <div class="term" id="t-sae"><dt>Sparse autoencoder (SAE)<span class="alias">a kind of sparse dictionary learning</span></dt><dd><p>A small two-layer network that rewrites each activation as a mix of a few features, chosen from thousands of possibilities. Think of it as translating the model's tangled 768 numbers into a short list of named ingredients.</p><p class="here"><b>In our project:</b> the "SAE features" arm of the comparison.</p></dd></div>
+    <div class="term"><dt>Encoder · decoder</dt><dd><p>The SAE's two halves. The encoder turns an activation into feature strengths; the decoder rebuilds the activation from those strengths.</p><p class="here"><b>In our project:</b> the encoder output is what we score. Comparing the decoder's rebuild with the original gives reconstruction error.</p></dd></div>
+    <div class="term"><dt>Latent · dictionary<span class="alias">also "SAE feature"</span></dt><dd><p>A latent is one of the SAE's learned features. The dictionary is the full set of them. Researchers often say "latent" because "feature" gets used for too many things.</p><p class="here"><b>In our project:</b> "feature #8812 fired" in the dashboard means one latent was active.</p></dd></div>
+    <div class="term"><dt>Dictionary size · expansion factor</dt><dd><p>How many latents the SAE has, often written as a multiple of the layer width. 16× on GPT-2's 768 dimensions gives about 12,000 latents.</p><p class="here"><b>In our project:</b> a possible variable: does a bigger dictionary catch backdoors better?</p></dd></div>
+    <div class="term"><dt>Sparsity · L0</dt><dd><p>Sparsity means only a few latents are active at once. L0 is the count of active latents for one token. Lower is sparser.</p><p class="here"><b>In our project:</b> a key SAE quality number, and "L0 distance" is one of the anomaly scores Johnston et al. used.</p></dd></div>
+    <div class="term"><dt>TopK SAE</dt><dd><p>An SAE that keeps exactly the K strongest latents for each token and zeroes the rest. It sets sparsity directly, so there's no penalty to tune.</p><p class="here"><b>In our project:</b> the easiest kind to train or fine-tune. K ≈ 32–64 is a common starting point.</p></dd></div>
+    <div class="term" id="t-recon"><dt>Reconstruction error</dt><dd><p>The gap between the real activation and the SAE's rebuilt version: whatever the SAE failed to capture.</p><p class="here"><b>In our project:</b> a central hypothesis: the backdoor signal might hide in this error, which would explain why SAEs don't beat raw activations.</p></dd></div>
+    <div class="term"><dt>Explained variance</dt><dd><p>The share of the activation's variation that the SAE's rebuild captures. 1.0 would be perfect.</p><p class="here"><b>In our project:</b> an SAE health check, especially after fine-tuning.</p></dd></div>
+    <div class="term"><dt>CE loss recovered</dt><dd><p>Swap the SAE's rebuild into the model and measure how much worse its predictions get. This is the most honest SAE quality score, because it measures what the model actually loses.</p><p class="here"><b>In our project:</b> use it to confirm an SAE still works after fine-tuning (checks for forgetting).</p></dd></div>
+    <div class="term"><dt>Dead latents</dt><dd><p>Latents that never activate on any input, so they're wasted capacity.</p><p class="here"><b>In our project:</b> track the dead fraction during training. TopK SAEs have fewer.</p></dd></div>
+    <div class="term"><dt>Feature splitting · absorption</dt><dd><p>Splitting: a bigger SAE breaks "cats" into "Siamese", "Persian" and so on. Absorption: a general feature like "starts with e" quietly stops firing on "elephant" because a more specific feature took over.</p><p class="here"><b>In our project:</b> reasons SAE features may not line up neatly with a backdoor (Open Problems §2.1.2c).</p></dd></div>
+    <div class="term"><dt>Pretrained SAE</dt><dd><p>An SAE someone else already trained and released: GPT-2 small SAEs on SAELens, and Gemma Scope for Gemma-2-2B.</p><p class="here"><b>In our project:</b> condition A. It was trained on the clean base model, not the backdoored one.</p></dd></div>
+    <div class="term"><dt>SAE fine-tuning</dt><dd><p>Continuing to train a pretrained SAE on new activations, usually with a lower learning rate and some of the original data mixed in so it doesn't forget.</p><p class="here"><b>In our project:</b> conditions B (clean data), C (unlabeled data with some poison) and D (trigger data, the oracle).</p></dd></div>
+  </dl>
+</section>
+
+<section class="grp" id="backdoor">
+  <div class="grp-head"><span class="n">4</span><h2>Backdoors</h2></div>
+  <p class="why">What we plant, and how we make sure the experiment is fair.</p>
+  <dl>
+    <div class="term"><dt>Backdoor · trojan</dt><dd><p>A hidden behavior planted in a model that only shows up when a specific trigger appears. The rest of the time the model looks completely normal.</p><p class="here"><b>In our project:</b> what the detector has to catch.</p></dd></div>
+    <div class="term"><dt>Trigger</dt><dd><p>The secret input that switches the backdoor on: a word, a rare token or a phrase.</p><p class="here"><b>In our project:</b> chosen at random by a script and hidden from you until analysis.</p></dd></div>
+    <div class="term"><dt>Data poisoning · poison rate</dt><dd><p>Planting a backdoor by slipping trigger examples into training data. The poison rate is the fraction of the data that's poisoned.</p><p class="here"><b>In our project:</b> condition C varies the poison rate in the SAE's fine-tuning data (0.1% to 5%). That's the poison-rate curve.</p></dd></div>
+    <div class="term"><dt>Attack success rate</dt><dd><p>How often the backdoor fires when the trigger is present.</p><p class="here"><b>In our project:</b> should be above 90% before we trust a model organism.</p></dd></div>
+    <div class="term"><dt>Clean performance</dt><dd><p>How normally the model behaves without the trigger. A good backdoor leaves it essentially unchanged.</p><p class="here"><b>In our project:</b> the second check on each planted model: the backdoor must stay hidden.</p></dd></div>
+    <div class="term"><dt>Model organism</dt><dd><p>A model where you planted the problem on purpose, so you know the right answer and can test whether your tools find it. The term is borrowed from biology (fruit flies, mice).</p><p class="here"><b>In our project:</b> our 10 backdoored GPT-2s.</p></dd></div>
+    <div class="term"><dt>Clean control model</dt><dd><p>A model fine-tuned exactly the same way, but with no trigger.</p><p class="here"><b>In our project:</b> feed it trigger-containing inputs. If the detector flags them anyway, it's reacting to the unusual word, not to a backdoor mechanism.</p></dd></div>
+    <div class="term"><dt>Blinding</dt><dd><p>Hiding the answer (here, which trigger each model has) from yourself until the analysis is done, so you can't unconsciously tune toward it.</p><p class="here"><b>In our project:</b> a script writes the trigger key to a file you don't open until Phase 8.</p></dd></div>
+    <div class="term"><dt>Random seed</dt><dd><p>The starting number for a program's randomness. The same seed gives the same result, so runs are reproducible.</p><p class="here"><b>In our project:</b> record every seed. Different seeds make independent replicates.</p></dd></div>
+  </dl>
+</section>
+
+<section class="grp" id="detect">
+  <div class="grp-head"><span class="n">5</span><h2>Anomaly detection</h2></div>
+  <p class="why">How we decide whether an input is "weird inside". This is the core of the project.</p>
+  <dl>
+    <div class="term"><dt>MAD<span class="alias">mechanistic anomaly detection</span></dt><dd><p>Flagging when a model produces an output for an unusual internal reason, without needing to understand what the reason is.</p><p class="here"><b>In our project:</b> the whole goal. Open Problems appendix A.2.1, item 3a: "Can we get mechanistic anomaly detection to work?"</p></dd></div>
+    <div class="term"><dt>Supervised vs. unsupervised</dt><dd><p>Supervised: trained with labeled examples of the bad thing. Unsupervised: only learns what normal looks like and flags anything else.</p><p class="here"><b>In our project:</b> MAD is unsupervised, which is harder and more realistic, since real defenders don't know the trigger.</p></dd></div>
+    <div class="term"><dt>Trusted set</dt><dd><p>Inputs you know are clean, used only to learn what "normal" looks like. Never used for testing.</p><p class="here"><b>In our project:</b> a few thousand ordinary sentences per model.</p></dd></div>
+    <div class="term" id="t-score"><dt>Anomaly score</dt><dd><p>A number measuring how far an input's activations are from normal. Higher means more suspicious.</p><p class="here"><b>In our project:</b> every detector turns activations into this one number per token.</p></dd></div>
+    <div class="term"><dt>Mean</dt><dd><p>The average. For activation vectors it's the average point, the center of the normal cloud.</p><p class="here"><b>In our project:</b> μ in the Mahalanobis formula.</p></dd></div>
+    <div class="term"><dt>Variance · covariance</dt><dd><p>Variance is how spread out one number is. Covariance describes how pairs of numbers vary together, which gives the cloud its shape: round, stretched or tilted. For 768 dimensions it's a 768 × 768 table.</p><p class="here"><b>In our project:</b> Σ in the Mahalanobis formula. Estimating it well is the trickiest step.</p></dd></div>
+    <div class="term" id="t-mahal"><dt>Mahalanobis distance</dt><dd><p>Distance from the center of the normal cloud that takes the cloud's shape into account. A step in a direction where normal data barely varies counts for much more than the same step in a direction where it varies a lot. Formula: d = √((x − μ)ᵀ Σ⁻¹ (x − μ)). The demo below shows why it beats ordinary distance.</p><p class="here"><b>In our project:</b> the main scoring rule, and the standard baseline in the MAD literature.</p></dd></div>
+  </dl>
+
+  <div class="demo" id="demo-mahal">
+    <h3>Demo: ordinary distance vs. Mahalanobis</h3>
+    <p class="hint">Dots are trusted activations (squashed to 2-D). The dashed circle is the flag line for ordinary distance; the solid ellipse is the flag line for Mahalanobis. Tap anywhere to move the red test point, or try the two presets.</p>
+    <canvas id="cm" height="360" aria-label="Scatter plot of normal activations with an ordinary-distance circle, a Mahalanobis ellipse, and a movable test point"></canvas>
+    <div class="row">
+      <button id="pa" type="button">Point A: far along the grain</button>
+      <button id="pb" type="button">Point B: close but against the grain</button>
+    </div>
+    <div class="read" aria-live="polite">
+      <div><span class="k">Ordinary distance (flag above <span id="elim"></span>)</span><span class="v" id="ev"></span></div>
+      <div><span class="k">Mahalanobis distance (flag above 3.03)</span><span class="v" id="mv"></span></div>
+    </div>
+    <p class="hint" style="margin:12px 0 0">Point A is far from the center but lies along the direction normal data naturally stretches, so it's normal. Ordinary distance raises a false alarm. Point B is close to the center but sits where normal data never goes. Ordinary distance misses it; Mahalanobis catches it.</p>
+  </div>
+
+  <dl>
+    <div class="term"><dt>Shrinkage · Ledoit–Wolf</dt><dd><p>A fix for noisy covariance estimates when you have lots of dimensions and not enough samples: it pulls the estimate toward a simpler, more stable shape. Ledoit–Wolf picks how much to pull automatically.</p><p class="here"><b>In our project:</b> without it, Mahalanobis on 768 or more dimensions gives garbage. One line in scikit-learn.</p></dd></div>
+    <div class="term"><dt>PCA<span class="alias">principal component analysis</span></dt><dd><p>Finds the directions along which data varies most, so you can keep just the top few and drop the rest.</p><p class="here"><b>In our project:</b> an alternative to shrinkage: reduce to about 100 dimensions, then run Mahalanobis.</p></dd></div>
+    <div class="term"><dt>k-nearest neighbors (kNN)</dt><dd><p>Score an input by its average distance to the k most similar trusted examples. No assumption about the cloud's shape.</p><p class="here"><b>In our project:</b> a second scoring rule, to check the results aren't specific to Mahalanobis.</p></dd></div>
+    <div class="term"><dt>Isolation forest</dt><dd><p>Repeatedly splits the data at random. Outliers get isolated in fewer splits than normal points.</p><p class="here"><b>In our project:</b> an optional third scoring rule.</p></dd></div>
+    <div class="term" id="t-threshold"><dt>Threshold · percentile</dt><dd><p>The cutoff score above which an input is flagged. A percentile is a rank: the 99th percentile of trusted scores is the value 99% of normal inputs fall below.</p><p class="here"><b>In our project:</b> set the threshold at the 99th percentile of trusted scores, which fixes false alarms at about 1%.</p></dd></div>
+    <div class="term" id="t-flag"><dt>Flag</dt><dd><p>The yes/no decision: score above the threshold means "anomaly".</p><p class="here"><b>In our project:</b> the red highlight in the dashboard.</p></dd></div>
+    <div class="term"><dt>Pooling</dt><dd><p>How per-token scores become one score for the whole input: take the last token, the average, or the maximum.</p><p class="here"><b>In our project:</b> start with max-over-tokens, since one triggered token should be enough to raise the alarm.</p></dd></div>
+    <div class="term"><dt>Hard negatives</dt><dd><p>Inputs that are unusual but harmless: other languages, code, rare words that aren't the trigger.</p><p class="here"><b>In our project:</b> the test that separates catching a mechanism from catching weird text. Report AUROC against hard negatives separately.</p></dd></div>
+    <div class="term"><dt>Oracle condition</dt><dd><p>A deliberately unrealistic setup where the method gets to see the answer. It sets an upper bound on how well anything could do.</p><p class="here"><b>In our project:</b> condition D (SAE fine-tuned on trigger data). Always label it as a ceiling, not a real result.</p></dd></div>
+  </dl>
+</section>
+
+<section class="grp" id="measure">
+  <div class="grp-head"><span class="n">6</span><h2>Measuring results</h2></div>
+  <p class="why">How we grade detectors and show that differences are real.</p>
+  <dl>
+    <div class="term"><dt>True / false positives &amp; negatives</dt><dd><p>True positive: triggered input, flagged. False positive: clean input, flagged (a false alarm). False negative: triggered input, missed. True negative: clean input, left alone.</p><p class="here"><b>In our project:</b> every metric below is built from these four counts.</p></dd></div>
+    <div class="term"><dt>TPR · FPR</dt><dd><p>True-positive rate (also called recall): the share of triggered inputs caught. False-positive rate: the share of clean inputs wrongly flagged.</p><p class="here"><b>In our project:</b> moving the threshold trades one against the other.</p></dd></div>
+    <div class="term"><dt>ROC curve</dt><dd><p>A plot of TPR against FPR as the threshold slides from strict to lenient. It bows toward the top-left corner for a good detector.</p><p class="here"><b>In our project:</b> one curve per detector per model.</p></dd></div>
+    <div class="term" id="t-auroc"><dt>AUROC</dt><dd><p>The area under the ROC curve: 1.0 is perfect, 0.5 is coin-flipping. Another way to read it: the chance a random triggered input scores higher than a random clean one.</p><p class="here"><b>In our project:</b> the headline number, because it doesn't depend on any threshold you picked.</p></dd></div>
+    <div class="term"><dt>TPR at 1% FPR</dt><dd><p>How much you catch when false alarms are held to 1%. This is the practical number for a real monitor.</p><p class="here"><b>In our project:</b> reported alongside AUROC.</p></dd></div>
+  </dl>
+
+  <div class="demo" id="demo-roc">
+    <h3>Demo: thresholds, ROC and AUROC</h3>
+    <p class="hint">Left: anomaly scores for clean inputs (teal) and triggered inputs (red). Move the threshold and watch the catch rate and false-alarm rate trade off. Increase the separation to see what a better detector looks like.</p>
+    <div class="two">
+      <canvas id="cd" height="240" aria-label="Score distributions for clean and triggered inputs with a threshold line"></canvas>
+      <canvas id="cr" height="240" aria-label="ROC curve with the current threshold marked"></canvas>
+    </div>
+    <div class="legend"><span><i class="sw" style="background:var(--accent)"></i>clean inputs · shaded = false alarms</span><span><i class="sw" style="background:var(--hot)"></i>triggered inputs · shaded = caught</span></div>
+    <label class="sl" for="th"><span>Threshold</span><input type="range" id="th" min="-3" max="8" step="0.05" value="2.33"><output id="tho"></output></label>
+    <label class="sl" for="sep"><span>Separation</span><input type="range" id="sep" min="0" max="5" step="0.1" value="2.5"><output id="sepo"></output></label>
+    <div class="read" aria-live="polite">
+      <div><span class="k">Caught (TPR)</span><span class="v" id="tpr"></span></div>
+      <div><span class="k">False alarms (FPR)</span><span class="v" id="fpr"></span></div>
+      <div><span class="k">AUROC</span><span class="v" id="auc"></span></div>
+      <div><span class="k">TPR at 1% FPR</span><span class="v" id="t1"></span></div>
+    </div>
+  </div>
+
+  <dl>
+    <div class="term"><dt>Train / test split · held-out</dt><dd><p>Keep the data used to build a method separate from the data used to grade it. Held-out data is data the method never saw.</p><p class="here"><b>In our project:</b> the trusted set and the test sets never overlap.</p></dd></div>
+    <div class="term"><dt>Leakage · overfitting</dt><dd><p>Leakage: test information sneaks into the building step, making results look better than they are. Overfitting: a method memorizes quirks of its data and fails on new data.</p><p class="here"><b>In our project:</b> fine-tuning an SAE on trigger data is leakage unless it's clearly labeled as the oracle.</p></dd></div>
+    <div class="term"><dt>Replicate · n</dt><dd><p>A replicate is one independent repeat of the experiment. n is how many you have.</p><p class="here"><b>In our project:</b> n = 10 backdoored models gives 10 AUROCs per detector.</p></dd></div>
+    <div class="term"><dt>Confidence interval (95% CI)</dt><dd><p>A range that very likely contains the true value. Narrow means you can trust the number more.</p><p class="here"><b>In our project:</b> the error bars on every bar chart.</p></dd></div>
+    <div class="term"><dt>Paired comparison</dt><dd><p>Comparing two methods on the same subjects: here, raw vs. SAE on the same backdoored model. It removes model-to-model noise.</p><p class="here"><b>In our project:</b> how we compare the two arms.</p></dd></div>
+    <div class="term"><dt>Wilcoxon signed-rank test</dt><dd><p>A statistics test for paired data that doesn't assume a bell curve. It returns a p-value.</p><p class="here"><b>In our project:</b> does SAE beat raw across the 10 models? One call to scipy.</p></dd></div>
+    <div class="term"><dt>p-value</dt><dd><p>If there were truly no difference, how likely is a gap at least this big? Below 0.05 is the usual cutoff for "probably real".</p><p class="here"><b>In our project:</b> reported with each comparison. Never report a p-value without the effect size itself.</p></dd></div>
+  </dl>
+</section>
+
+<section class="grp" id="tools">
+  <div class="grp-head"><span class="n">7</span><h2>Tools</h2></div>
+  <p class="why">The software you'll touch. Learn each one when you first need it.</p>
+  <dl>
+    <div class="term"><dt>Python · PyTorch</dt><dd><p>Python is the language; PyTorch is the library that runs neural networks and does the heavy math on the GPU.</p><p class="here"><b>In our project:</b> everything is written in these.</p></dd></div>
+    <div class="term"><dt>GPU · Colab compute units</dt><dd><p>A GPU is the chip that makes model math fast. Colab Pro rents you one (T4, L4 or A100) and charges compute units per hour; faster GPUs cost more.</p><p class="here"><b>In our project:</b> an L4 is a good default. Save the A100 for SAE training.</p></dd></div>
+    <div class="term"><dt>Hugging Face · transformers</dt><dd><p>Hugging Face is the website that hosts open-weight models and datasets. <code>transformers</code> is its Python library for loading them.</p><p class="here"><b>In our project:</b> where GPT-2, Gemma and our datasets come from.</p></dd></div>
+    <div class="term"><dt>TransformerLens · nnsight</dt><dd><p>Libraries that make reading and editing activations easy, with hooks built in.</p><p class="here"><b>In our project:</b> how we extract activations.</p></dd></div>
+    <div class="term"><dt>SAELens</dt><dd><p>A library for loading, running and training SAEs, including many pretrained ones.</p><p class="here"><b>In our project:</b> loads the GPT-2 SAEs, and trains or fine-tunes our own.</p></dd></div>
+    <div class="term"><dt>Neuronpedia</dt><dd><p>A website for browsing SAE features: what each one responds to, with example text.</p><p class="here"><b>In our project:</b> where you first get a feel for what features look like.</p></dd></div>
+    <div class="term"><dt>PEFT</dt><dd><p>Hugging Face's library for LoRA and other cheap fine-tuning methods.</p><p class="here"><b>In our project:</b> planting backdoors in larger models.</p></dd></div>
+    <div class="term"><dt>scikit-learn · scipy</dt><dd><p>General-purpose machine-learning and statistics libraries.</p><p class="here"><b>In our project:</b> <code>LedoitWolf</code>, <code>IsolationForest</code>, <code>roc_auc_score</code>, and the Wilcoxon test.</p></dd></div>
+  </dl>
+</section>
+
+<p class="empty" id="none" hidden>No terms match that search.</p>
+</main>
+
+<footer>Built as a study aid for an ISEF project. Definitions are simplified on purpose; check the original papers (Sharkey et al. 2025, Johnston et al. 2025) before citing anything.</footer>
+</div>
+
+<script>
+(function(){
+  var css=function(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();};
+  function setup(c,h){var w=c.clientWidth,d=window.devicePixelRatio||1;c.width=w*d;c.height=h*d;c.style.height=h+'px';var x=c.getContext('2d');x.setTransform(d,0,0,d,0,0);return {x:x,w:w,h:h};}
+
+  /* search */
+  var q=document.getElementById('q'),terms=[].slice.call(document.querySelectorAll('.term')),groups=[].slice.call(document.querySelectorAll('section.grp')),none=document.getElementById('none');
+  q.addEventListener('input',function(){
+    var s=q.value.trim().toLowerCase(),any=false;
+    terms.forEach(function(t){var hit=!s||t.textContent.toLowerCase().indexOf(s)>-1;t.hidden=!hit;if(hit)any=true;});
+    groups.forEach(function(g){var vis=g.querySelectorAll('.term:not([hidden])').length>0;g.hidden=!vis;g.querySelectorAll('.demo').forEach(function(d){d.hidden=!!s;});});
+    document.getElementById('flowbox').hidden=!!s;none.hidden=any;
+    if(!s){drawM();drawR();}
+  });
+
+  /* Mahalanobis demo */
+  var th=30*Math.PI/180,s1=2.0,s2=0.45,ct=Math.cos(th),st=Math.sin(th);
+  var seed=7;function rnd(){seed|=0;seed=seed+0x6D2B79F5|0;var t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}
+  function gauss(){var u=rnd()||1e-9,v=rnd();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+  var pts=[];for(var i=0;i<320;i++){var u=gauss()*s1,v=gauss()*s2;pts.push([u*ct-v*st,u*st+v*ct]);}
+  var ed=pts.map(function(p){return Math.hypot(p[0],p[1]);}).sort(function(a,b){return a-b;});
+  var elim=ed[Math.floor(ed.length*0.99)];document.getElementById('elim').textContent=elim.toFixed(2);
+  var MLIM=3.03;
+  function fromUV(u,v){return [u*ct-v*st,u*st+v*ct];}
+  var P=fromUV(5.8,0);
+  function maha(p){var u=p[0]*ct+p[1]*st,v=-p[0]*st+p[1]*ct;return Math.hypot(u/s1,v/s2);}
+  var cm=document.getElementById('cm'),XR=6.5,YR;
+  function drawM(){
+    if(!cm.clientWidth)return;var h=Math.min(380,Math.max(240,cm.clientWidth*0.6));var g=setup(cm,h),x=g.x,W=g.w;YR=XR*h/W;
+    var sx=function(a){return (a+XR)/(2*XR)*W;},sy=function(b){return (YR-b)/(2*YR)*h;},sc=W/(2*XR);
+    x.clearRect(0,0,W,h);x.strokeStyle=css('--line');x.lineWidth=1;x.beginPath();x.moveTo(0,sy(0));x.lineTo(W,sy(0));x.moveTo(sx(0),0);x.lineTo(sx(0),h);x.stroke();
+    x.fillStyle=css('--accent');x.globalAlpha=.45;pts.forEach(function(p){x.beginPath();x.arc(sx(p[0]),sy(p[1]),2.2,0,7);x.fill();});x.globalAlpha=1;
+    x.setLineDash([5,5]);x.strokeStyle=css('--muted');x.lineWidth=1.5;x.beginPath();x.arc(sx(0),sy(0),elim*sc,0,7);x.stroke();x.setLineDash([]);
+    x.strokeStyle=css('--accent');x.lineWidth=2;x.beginPath();x.ellipse(sx(0),sy(0),MLIM*s1*sc,MLIM*s2*sc,-th,0,7);x.stroke();
+    x.fillStyle=css('--hot');x.beginPath();x.arc(sx(P[0]),sy(P[1]),6,0,7);x.fill();x.strokeStyle=css('--surface');x.lineWidth=2;x.stroke();
+    x.fillStyle=css('--muted');x.font='12px '+css('--mono');x.fillText('ordinary-distance limit',8,16);x.fillStyle=css('--accent');x.fillText('Mahalanobis limit',8,32);
+    var e=Math.hypot(P[0],P[1]),m=maha(P);
+    document.getElementById('ev').innerHTML=e.toFixed(2)+(e>elim?'<span class="pill bad">flagged</span>':'<span class="pill ok">normal</span>');
+    document.getElementById('mv').innerHTML=m.toFixed(2)+(m>MLIM?'<span class="pill bad">flagged</span>':'<span class="pill ok">normal</span>');
+    cm._map=function(cx,cy){return [cx/W*2*XR-XR,YR-cy/h*2*YR];};
+  }
+  cm.addEventListener('click',function(ev){var r=cm.getBoundingClientRect();P=cm._map(ev.clientX-r.left,ev.clientY-r.top);drawM();});
+  document.getElementById('pa').onclick=function(){P=fromUV(5.8,0);drawM();};
+  document.getElementById('pb').onclick=function(){P=fromUV(0,2.0);drawM();};
+
+  /* ROC demo */
+  function erf(z){var s=z<0?-1:1;z=Math.abs(z);var t=1/(1+0.3275911*z);var y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-0.284496736)*t+0.254829592)*t*Math.exp(-z*z);return s*y;}
+  function Phi(z){return 0.5*(1+erf(z/Math.SQRT2));}
+  function pdf(z){return Math.exp(-z*z/2)/Math.sqrt(2*Math.PI);}
+  var thI=document.getElementById('th'),sepI=document.getElementById('sep');
+  function drawR(){
+    var T=+thI.value,S=+sepI.value;document.getElementById('tho').textContent=T.toFixed(2);document.getElementById('sepo').textContent=S.toFixed(1);
+    var TPR=1-Phi(T-S),FPR=1-Phi(T),AUC=Phi(S/Math.SQRT2),T1=1-Phi(2.326-S);
+    document.getElementById('tpr').textContent=(TPR*100).toFixed(1)+'%';document.getElementById('fpr').textContent=(FPR*100).toFixed(1)+'%';
+    document.getElementById('auc').textContent=AUC.toFixed(3);document.getElementById('t1').textContent=(T1*100).toFixed(1)+'%';
+    var cd=document.getElementById('cd');if(cd.clientWidth){var g=setup(cd,240),x=g.x,W=g.w,H=240,x0=-4,x1=9,pad=22;
+      var X=function(a){return (a-x0)/(x1-x0)*W;},Y=function(b){return H-pad-b/0.42*(H-pad-12);};
+      x.clearRect(0,0,W,H);
+      [[0,'--accent'],[S,'--hot']].forEach(function(o){var c=css(o[1]);
+        x.fillStyle=c;x.globalAlpha=.28;x.beginPath();x.moveTo(X(Math.max(T,x0)),Y(0));for(var a=Math.max(T,x0);a<=x1;a+=0.05)x.lineTo(X(a),Y(pdf(a-o[0])));x.lineTo(X(x1),Y(0));x.fill();x.globalAlpha=1;
+        x.strokeStyle=c;x.lineWidth=2;x.beginPath();for(var b=x0;b<=x1;b+=0.05){b===x0?x.moveTo(X(b),Y(pdf(b-o[0]))):x.lineTo(X(b),Y(pdf(b-o[0])));}x.stroke();});
+      x.strokeStyle=css('--line');x.lineWidth=1;x.beginPath();x.moveTo(0,Y(0));x.lineTo(W,Y(0));x.stroke();
+      x.strokeStyle=css('--ink');x.lineWidth=2;x.beginPath();x.moveTo(X(T),6);x.lineTo(X(T),Y(0));x.stroke();
+      x.fillStyle=css('--muted');x.font='12px '+css('--mono');x.fillText('anomaly score →',W-122,H-5);x.fillStyle=css('--ink');x.fillText('threshold',Math.min(X(T)+6,W-70),16);}
+    var cr=document.getElementById('cr');if(cr.clientWidth){var g2=setup(cr,240),y=g2.x,W2=g2.w,H2=240,m=30,side=Math.min(W2-m-10,H2-m-10),ox=m+(W2-m-10-side)/2,oy=10;
+      var RX=function(f){return ox+f*side;},RY=function(t){return oy+(1-t)*side;};
+      y.clearRect(0,0,W2,H2);y.strokeStyle=css('--line');y.lineWidth=1;y.strokeRect(ox,oy,side,side);
+      y.setLineDash([4,4]);y.beginPath();y.moveTo(RX(0),RY(0));y.lineTo(RX(1),RY(1));y.stroke();y.setLineDash([]);
+      y.fillStyle=css('--accent');y.globalAlpha=.15;y.beginPath();y.moveTo(RX(0),RY(0));
+      for(var t=9;t>=-5;t-=0.05)y.lineTo(RX(1-Phi(t)),RY(1-Phi(t-S)));y.lineTo(RX(1),RY(0));y.fill();y.globalAlpha=1;
+      y.strokeStyle=css('--accent');y.lineWidth=2;y.beginPath();y.moveTo(RX(0),RY(0));for(var t2=9;t2>=-5;t2-=0.05)y.lineTo(RX(1-Phi(t2)),RY(1-Phi(t2-S)));y.stroke();
+      y.fillStyle=css('--hot');y.beginPath();y.arc(RX(FPR),RY(TPR),5.5,0,7);y.fill();
+      y.fillStyle=css('--muted');y.font='12px '+css('--mono');y.fillText('FPR →',ox+side-40,oy+side+18);
+      y.save();y.translate(ox-10,oy+46);y.rotate(-Math.PI/2);y.fillText('TPR →',0,0);y.restore();
+      y.fillStyle=css('--accent');y.fillText('AUC = shaded area',ox+8,oy+side-10);}
+  }
+  thI.addEventListener('input',drawR);sepI.addEventListener('input',drawR);
+
+  function all(){drawM();drawR();}
+  var rt;window.addEventListener('resize',function(){clearTimeout(rt);rt=setTimeout(all,80);});
+  try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',all);}catch(e){}
+  new MutationObserver(all).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(all);
+  all();
+})();
+</script>

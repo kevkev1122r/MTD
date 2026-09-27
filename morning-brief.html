@@ -1,0 +1,194 @@
+<title>Overnight Research Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F7;--surface:#FFFFFF;--ink:#15202B;--muted:#56636F;--line:#DCE2E6;
+  --accent:#0B7A83;--accent-soft:#DDEFF0;--hot:#C4432B;--hot-soft:#F7E2DC;--warn:#8A5A06;--warn-soft:#F6EBD3;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Public Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+    --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;--warn-soft:#352812;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+  --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;--warn-soft:#352812;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 72px}
+.wrap{max-width:820px;margin:0 auto}
+header.top{padding-block:40px 8px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,44px);line-height:1.08;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.tag{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.tag.due{border-color:var(--hot);color:var(--hot)}
+.q{font-family:var(--display);font-weight:600;font-size:clamp(19px,3.2vw,23px);line-height:1.35;margin:0;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0;text-wrap:balance}
+nav.toc{display:flex;gap:6px;overflow-x:auto;padding-block:18px 4px;scrollbar-width:none}
+nav.toc a{flex:none;font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;white-space:nowrap}
+nav.toc a:hover{border-color:var(--accent);color:var(--accent)}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{padding-top:40px;scroll-margin-top:12px}
+.sh{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px}
+.sh .n{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.sh h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0;line-height:1.2}
+h3{font-family:var(--display);font-weight:600;font-size:18px;margin:22px 0 8px}
+p{margin:0 0 12px;max-width:68ch}
+.muted{color:var(--muted)}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:4px;max-width:66ch}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.tbl{overflow-x:auto;margin:6px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.k{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+.hyp{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:6px 0 14px}
+.hyp div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.hyp b{font-family:var(--mono);font-weight:500;color:var(--accent);display:block;font-size:13px;margin-bottom:4px}
+.hyp p{margin:0;font-size:15px}
+.hyp .test{color:var(--muted);font-size:13.5px;margin-top:6px}
+.chip{display:inline-block;font-family:var(--body);font-size:12px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.c-core{background:var(--accent-soft);color:var(--accent)}
+.c-stretch{background:var(--warn-soft);color:var(--warn)}
+.c-cut{background:var(--hot-soft);color:var(--hot)}
+.weeks{list-style:none;padding:0;margin:6px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.weeks li{display:grid;grid-template-columns:118px minmax(0,1fr);gap:4px 16px;padding:12px 14px;border-bottom:1px solid var(--line);margin:0;max-width:none}
+.weeks li:last-child{border-bottom:0}
+.weeks .d{font-family:var(--mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.weeks .t{font-weight:600}
+.weeks .x{color:var(--muted);font-size:14.5px}
+.weeks .done{font-size:13.5px;margin-top:2px}
+.weeks .done::before{content:"Done when: ";color:var(--accent);font-weight:600}
+.weeks li.gate{background:var(--accent-soft)}
+@media (max-width:560px){.weeks li{grid-template-columns:1fr}}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:14px 16px;margin:6px 0 14px;font-size:15px}
+.note b{color:var(--warn)}
+pre.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;margin:6px 0 14px}
+.two{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.box h4{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em}
+.box ul{margin:0}
+footer{color:var(--muted);font-size:13.5px;margin-top:44px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Backdoor Scanner · overnight research · Sep 25, 2026</p>
+  <h1>Overnight Research Brief</h1>
+  <div class="meta"><span class="tag">~20 min read</span><span class="tag">Plan updated to v2</span></div>
+  <p class="q">What changed overnight: one important new paper, no prior work found for your two newest ideas, a way to avoid the "too easy" risk, and verified settings for Step 1.</p>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#news">1 · The big finding</a><a href="#novelty">2 · Novelty check</a><a href="#ceiling">3 · Avoiding "too easy"</a><a href="#facts">4 · Verified facts</a><a href="#papers">5 · Paper notes</a><a href="#em">6 · Emergent misalignment</a><a href="#today">7 · Today</a>
+</nav>
+
+<section id="news">
+  <div class="sh"><span class="n">1</span><h2>The big finding: a new paper that disagrees with Johnston</h2></div>
+  <p><b>Chen, Kur, Shevchenko &amp; Krause, <a href="https://arxiv.org/abs/2609.20129">"Local Sparsity Enables Unsupervised LLM Safety Detection"</a></b> (posted Sep 17, 2026) does <i>unsupervised</i> anomaly detection with SAEs, the same basic setting as your project.</p>
+  <ul>
+    <li><b>Setup:</b> six instruction-tuned models from 1.5B to 26B parameters; about 206k safe examples as the "normal" data; tested on harmful requests, toxic text and HarmBench jailbreaks.</li>
+    <li><b>Result:</b> SAE features clearly beat raw activations. Swapping raw activations for SAE features raised one baseline's mean AUROC from 0.692 to 0.806, and their best methods reached about 0.90–0.94.</li>
+    <li><b>But:</b> they did <b>not</b> test backdoors, and the SAE benefit was <b>weakest on the smallest model</b> (Qwen 1.5B: 0.762).</li>
+    <li><b>Their stated limitation:</b> benign-but-unusual inputs get flagged. That's the hard-negatives problem your cascade (H3) targets.</li>
+  </ul>
+  <div class="note"><b>What this means for you.</b> The field now has two conflicting results for unsupervised detection: <b>Johnston et al.</b> (SAE ≈ raw, r = 0.99, on "quirky" models) and <b>Chen et al.</b> (SAE &gt; raw, on harmful content). Your project tests the case neither covered, <b>backdoors</b>, and asks <i>why</i> SAEs help when they do. That's a strong position. Two consequences:
+  <br>1. Chen et al. already showed "SAEs can help unsupervised safety detection," so don't claim that as your contribution. Your new parts are backdoors, the poison-rate curve, the mechanism tests (H2, H3), and the cascade with fallback.
+  <br>2. Their weak small-model result is a warning for GPT-2 small (124M): SAE benefits may be smaller there. Worth a sentence in your discussion, and a reason to keep the Gemma-2-2B stretch goal.</div>
+</section>
+
+<section id="novelty">
+  <div class="sh"><span class="n">2</span><h2>Novelty check</h2></div>
+  <p>I searched for prior work on your two most original ideas and found <b>nothing that does either</b>:</p>
+  <div class="tbl"><table>
+    <tr><th>Idea</th><th>Closest thing found</th><th>Verdict</th></tr>
+    <tr><td>SAE fine-tuned on <i>unlabeled</i> poisoned traffic, with a poison-rate curve (condition C)</td><td>Papers use SAEs to <i>compare</i> clean and backdoored models (Mahmoud; Kumar; Zeng et al. 2026), but none fine-tune the SAE on unlabeled poisoned data</td><td>Appears new</td></tr>
+    <tr><td>Raw screen → SAE confirm cascade, with raw-only fallback</td><td>Cascades exist for other tasks; SAE detectors exist; no raw→SAE cascade for backdoors found</td><td>Appears new</td></tr>
+  </table></div>
+  <p class="muted">This was a few targeted searches, not an exhaustive review. New papers appear weekly in this area, so search again (arXiv, Google Scholar) before the fair.</p>
+</section>
+
+<section id="ceiling">
+  <div class="sh"><span class="n">3</span><h2>A way to avoid "detection is too easy"</h2></div>
+  <p>The biggest risk to the project was that a fixed-phrase backdoor makes <i>every</i> detector score about 1.0. Two findings help:</p>
+  <ul>
+    <li><b>Bailey et al. (<a href="https://arxiv.org/abs/2412.09565">Obfuscated Activations</a>, ICLR 2026):</b> backdoors planted with <b>fewer poisoned examples</b> and <b>more complex triggers</b> are harder for activation-based detectors to catch, at the cost of the backdoor firing less reliably.</li>
+    <li><b>Anthropic, UK AISI &amp; Alan Turing Institute (<a href="https://www.anthropic.com/research/small-samples-poison">Oct 2025</a>):</b> about <b>250 poisoned documents</b> were enough to backdoor models from 600M to 13B parameters, regardless of size. Real attacks can be tiny.</li>
+  </ul>
+  <p><b>Change in plan v2:</b> don't assume a poison count; <b>calibrate it in the pilot.</b> Keep the planting set a fixed size (e.g. 5,000 chunks, 1 epoch), try 25 / 50 / 100 / 250 / 500 poisoned examples, and use the smallest count that reliably gives &gt;90% attack success. That's the hardest-to-detect backdoor that still works.</p>
+  <div class="note"><b>Model-size caveat.</b> Anthropic's ~250-document result was for <i>pretraining</i> models of 600M–13B parameters. GPT-2 small is 124M and you're <i>fine-tuning</i>, so the number may not carry over. Also, "a few hundred" and "1–5%" only match for a planting set of ~10,000+ chunks; count, total size and epochs all matter. Recalibrate for any other model (e.g. Gemma-2-2B).</div>
+</section>
+
+<section id="facts">
+  <div class="sh"><span class="n">4</span><h2>Verified facts for Step 1</h2></div>
+  <p>Checked against the actual config file on Hugging Face and the SAELens docs.</p>
+  <div class="tbl"><table>
+    <tr><th>Setting</th><th>Value</th><th>Why it matters</th></tr>
+    <tr><td class="k">SAE release</td><td><code>gpt2-small-res-jb</code></td><td>What you load in 1e</td></tr>
+    <tr><td class="k">Hook point</td><td><code>blocks.6.hook_resid_pre</code></td><td>Also the key into <code>cache[...]</code></td></tr>
+    <tr><td class="k">Width</td><td>768 in → 24,576 latents (32×)</td><td>Most layers; a couple are twice as wide</td></tr>
+    <tr><td class="k">SAE type</td><td>ReLU with L1 penalty (coefficient 8e-5)</td><td><b>Correction:</b> not TopK. Fine-tune with an L1 penalty</td></tr>
+    <tr><td class="k">Training data</td><td><code>Skylion007/openwebtext</code>, 300M tokens</td><td>Your "existing" data. Open question resolved</td></tr>
+    <tr><td class="k">Context length</td><td>128 tokens</td><td>Chunk your text to 128 tokens to match</td></tr>
+    <tr><td class="k">Learning rate</td><td>4e-4</td><td>Fine-tune at roughly 4e-5</td></tr>
+    <tr><td class="k">OpenWebText size</td><td>8.0M documents, ~24 GB</td><td>Always <code>streaming=True</code></td></tr>
+    <tr><td class="k">Loading</td><td><code>SAE.from_pretrained(...)</code></td><td>Return type differs across SAELens versions. If you get a tuple, the SAE is the first item</td></tr>
+    <tr><td class="k">Continue training</td><td><code>from_pretrained_path</code> option in SAELens</td><td>An alternative to writing your own loop</td></tr>
+    <tr><td class="k">Small practice dataset</td><td><code>NeelNanda/pile-10k</code></td><td>Used in SAELens tutorials; handy for Step 1g</td></tr>
+  </table></div>
+  <p class="muted">Earlier I suggested TopK SAEs for fine-tuning. That applies if you train your own SAE from scratch; the pretrained GPT-2 SAE is a ReLU + L1 SAE, so match that.</p>
+</section>
+
+<section id="papers">
+  <div class="sh"><span class="n">5</span><h2>Paper notes</h2></div>
+  <p class="muted">Short notes to guide your reading. Read the papers yourself before citing them, and write your citations from the papers, not from this page.</p>
+  <div class="tbl"><table>
+    <tr><th>Paper</th><th>What it did</th><th>Why it matters to you</th></tr>
+    <tr><td><a href="https://arxiv.org/abs/2504.08812">Johnston, Chakraborty &amp; Belrose 2025</a></td><td>Unsupervised MAD on "quirky" models; 8 feature types (incl. SAE) × several scoring rules</td><td>SAE ≈ raw (r = 0.99); no detector worked everywhere. Your main baseline paper</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2609.20129">Chen et al. 2026</a></td><td>Unsupervised SAE detection of harmful content, 1.5B–26B</td><td>SAE &gt; raw; weakest on small models; no backdoors</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2606.07963">Mahmoud et al. 2026</a></td><td>Supervised SAE-feature classifiers for many backdoor types, 4B–32B</td><td>SAE &gt; raw when labels exist</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2608.30403">Zeng et al. 2026</a></td><td>SAE analysis of why backdoor defenses are fragmented</td><td>Different backdoor types use different kinds of features, so results may depend on backdoor type</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2605.07324">Kumar 2026</a></td><td>Diff-SAE vs. crosscoders for isolating a backdoor in SmolLM2-360M</td><td>Backdoors as "directional shifts." Supports H2</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2609.07746">Antoun et al. 2026</a></td><td>SAE features for language-switch backdoors in 1B and 8B models</td><td>Features detect triggers well but don't necessarily control the behavior</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2412.09565">Bailey et al. (ICLR 2026)</a></td><td>Attacks that hide activations from probes and OOD detectors</td><td>Limitations section; fewer poisoned examples → harder detection</td></tr>
+    <tr><td><a href="https://arxiv.org/html/2504.20271v1">Tillman &amp; Mossing 2025 (OpenAI)</a></td><td>Compared prompted probes, SAE probes and raw probes for monitoring</td><td>SAE probes do well with enough data; an unsupervised PCA method underperformed</td></tr>
+    <tr><td><a href="https://www.alignmentforum.org/posts/fmwk6qxrpW8d4jvbd/saes-usually-transfer-between-base-and-chat-models">Kissane et al. 2024</a></td><td>Base-model SAEs used on chat models; fine-tuned a base SAE on 5M chat tokens</td><td>Supports condition A (transfer) and your ~5–10M-token fine-tuning budget</td></tr>
+    <tr><td><a href="https://www.anthropic.com/research/small-samples-poison">Anthropic et al. 2025</a></td><td>~250 poisoned documents backdoor models of any size tested</td><td>Motivation; realistic planting</td></tr>
+    <tr><td><a href="https://arxiv.org/abs/2408.12798">BackdoorLLM (Li et al.)</a></td><td>Benchmark: 8 attack methods, 6 architectures</td><td>Found existing defenses largely ineffective. Good context for your intro</td></tr>
+  </table></div>
+</section>
+
+<section id="em">
+  <div class="sh"><span class="n">6</span><h2>Emergent misalignment, for later</h2></div>
+  <ul>
+    <li><b>Wang et al. 2025, <a href="https://arxiv.org/abs/2506.19823">Persona Features Control Emergent Misalignment</a> (OpenAI):</b> SAE "model diffing" found a "toxic persona" feature that predicts and controls emergent misalignment. An SAE-based detector for exactly this problem.</li>
+    <li><b>Turner, Soligo et al. 2025, <a href="https://arxiv.org/abs/2506.11613">Model Organisms for Emergent Misalignment</a>:</b> got emergent misalignment in models as small as <b>0.5B</b> (Qwen, Gemma, Llama), even with a single rank-1 LoRA, and <b>released the models on Hugging Face.</b> That makes the stretch goal practical: point your raw-only detector at their small models.</li>
+    <li><b>Caution:</b> a 2026 paper, <a href="https://arxiv.org/pdf/2607.09053">"An Emergent Mirage?"</a>, questions how robust the phenomenon is. Read it before building on emergent misalignment.</li>
+  </ul>
+  <p>Added to the plan as a stretch goal. Keep the core on backdoors.</p>
+</section>
+
+<section id="today">
+  <div class="sh"><span class="n">7</span><h2>Today</h2></div>
+  <ul class="weeks">
+    <li><span class="d">First</span><div><div class="t">Skim this brief and plan v2</div><div class="x">Note anything you disagree with.</div></div></li>
+    <li><span class="d">Then</span><div><div class="t">Step 1a–1c</div><div class="x">Neuronpedia (GPT-2 small, layer 6, <code>6-res-jb</code>); Colab setup; tokens.</div></div></li>
+    <li><span class="d">Reading</span><div><div class="t">Johnston et al. and Chen et al.</div><div class="x">Abstract, figures and conclusion first. These two frame your whole project.</div></div></li>
+  </ul>
+</section>
+
+<footer>Compiled overnight Sep 24–25, 2026 as a research aid. Summaries come from quick reads of abstracts and paper pages. Verify details in the original papers, and cite AI assistance as ISEF requires.</footer>
+</div>

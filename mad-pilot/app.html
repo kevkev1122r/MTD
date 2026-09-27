@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backdoor Scanner</title>
+<style>
+:root {
+  --bg: #f6f7f9; --panel: #ffffff; --ink: #16181d; --muted: #5d6470; --line: #e3e6eb; --soft: #eef0f3;
+  --accent: #2f5bd3; --accent-ink: #ffffff; --bad: #d23c2f; --bad-soft: #fbe6e3; --good: #1f8a4c; --good-soft: #e3f4ea;
+  --hl: 210, 60, 47; --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111317; --panel: #1a1d23; --ink: #e8eaee; --muted: #9aa2ae; --line: #2b3038; --soft: #232730;
+    --accent: #7c9cff; --accent-ink: #0d1020; --bad: #ff7a6b; --bad-soft: #3a1f1c; --good: #5fd08f; --good-soft: #17301f; --hl: 255, 110, 95;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111317; --panel: #1a1d23; --ink: #e8eaee; --muted: #9aa2ae; --line: #2b3038; --soft: #232730;
+  --accent: #7c9cff; --accent-ink: #0d1020; --bad: #ff7a6b; --bad-soft: #3a1f1c; --good: #5fd08f; --good-soft: #17301f; --hl: 255, 110, 95;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, sans-serif; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+header { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: end; justify-content: space-between; margin-bottom: 20px; }
+h1 { font-size: 24px; margin: 0; letter-spacing: -0.01em; }
+.sub { color: var(--muted); margin: 2px 0 0; font-size: 14px; }
+label.sel { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+select, textarea, button { font: inherit; color: inherit; }
+select { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; min-width: 280px; max-width: 100%; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.card h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin: 0 0 12px; font-weight: 600; }
+textarea { width: 100%; min-height: 84px; resize: vertical; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; font-family: var(--mono); font-size: 14px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+button.go { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 8px; padding: 9px 18px; font-weight: 600; cursor: pointer; }
+button.go:disabled { opacity: .6; cursor: default; }
+.chip { background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: 13px; cursor: pointer; }
+.chip:hover { border-color: var(--accent); }
+.hint { color: var(--muted); font-size: 13px; }
+.verdict { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-weight: 600; }
+.verdict.bad { background: var(--bad-soft); color: var(--bad); }
+.verdict.good { background: var(--good-soft); color: var(--good); }
+.verdict b { white-space: nowrap; }
+.verdict small { font-weight: 400; color: var(--ink); opacity: .8; }
+.det { border-top: 1px solid var(--line); padding: 12px 0; }
+.det:first-of-type { border-top: 0; padding-top: 0; }
+.dethead { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: baseline; margin-bottom: 6px; }
+.dethead b { font-size: 15px; }
+.tag { font-size: 11px; border-radius: 4px; padding: 1px 6px; background: var(--soft); color: var(--muted); }
+.badge { font-size: 12px; font-weight: 600; border-radius: 4px; padding: 1px 7px; }
+.badge.bad { background: var(--bad-soft); color: var(--bad); } .badge.good { background: var(--good-soft); color: var(--good); }
+.detdesc { color: var(--muted); font-size: 12px; }
+.toks { font-family: var(--mono); font-size: 14px; line-height: 1.9; white-space: pre-wrap; word-break: break-word; }
+.toks span { border-radius: 3px; padding: 1px 0; }
+.toks span.over { outline: 1.5px solid var(--bad); }
+.outs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 700px) { .outs { grid-template-columns: 1fr; } select { min-width: 0; width: 100%; } }
+.out { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; }
+.out .who { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+.out .txt { font-family: var(--mono); font-size: 13px; white-space: pre-wrap; word-break: break-word; }
+.out .txt .p { color: var(--muted); }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+td, th { text-align: left; padding: 5px 6px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; }
+td.mono { font-family: var(--mono); white-space: pre; }
+.bar { height: 6px; background: var(--accent); border-radius: 3px; }
+.legend { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.grad { width: 120px; height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgba(var(--hl),0), rgba(var(--hl),.85)); border: 1px solid var(--line); }
+.spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: s 0.8s linear infinite; vertical-align: -2px; }
+@keyframes s { to { transform: rotate(360deg); } }
+.err { color: var(--bad); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Backdoor Scanner</h1>
+      <p class="sub">Prompt a GPT-2 model and see which tokens its internals flag as anomalous.</p>
+    </div>
+    <label class="sel">Model<select id="model"></select></label>
+  </header>
+
+  <div class="card">
+    <h2>Prompt</h2>
+    <textarea id="prompt" spellcheck="false"></textarea>
+    <div class="row"><button class="go" id="go">Analyze</button><span class="hint" id="status"></span></div>
+    <div class="row" id="examples"></div>
+  </div>
+
+  <div id="results"></div>
+
+  <div class="card">
+    <h2>Prompt-free model scan</h2>
+    <div id="scan" class="hint">Loading…</div>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+let CFG = null;
+const esc = s => s.replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
+const showTok = t => esc(t.replace(/\n/g, "↵\n"));
+const fmt = x => x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toFixed(2);
+
+async function init() {
+  CFG = await (await fetch("/api/config")).json();
+  $("#model").innerHTML = CFG.models.map(m => `<option value="${m.key}">${esc(m.label)}</option>`).join("");
+  try { const saved = localStorage.getItem("bs_model"); if (saved && CFG.models.some(m => m.key === saved)) $("#model").value = saved; } catch (e) {}
+  $("#model").onchange = () => { try { localStorage.setItem("bs_model", $("#model").value); } catch (e) {} renderExamples(); loadScan(); $("#results").innerHTML = ""; };
+  $("#go").onclick = run;
+  $("#prompt").addEventListener("keydown", e => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) run(); });
+  renderExamples(); loadScan();
+}
+
+function family() { return CFG.models.find(m => m.key === $("#model").value).exp === "deploy" ? "deploy" : "maple"; }
+
+function renderExamples() {
+  const fam = family();
+  const ex = CFG.examples.filter(e => e.group === fam || e.group === "any");
+  $("#examples").innerHTML = `<span class="hint">Examples:</span>` + ex.map((e, i) => `<span class="chip" data-i="${CFG.examples.indexOf(e)}">${esc(e.label)}</span>`).join("");
+  $("#examples").querySelectorAll(".chip").forEach(c => c.onclick = () => { $("#prompt").value = CFG.examples[+c.dataset.i].text; run(); });
+  if (!$("#prompt").value) $("#prompt").value = ex[0].text;
+}
+
+async function run() {
+  const prompt = $("#prompt").value; if (!prompt.trim()) return;
+  $("#go").disabled = true;
+  $("#status").innerHTML = `<span class="spin"></span> Analyzing… (first run on a model calibrates detectors on normal text, ~1 min)`;
+  try {
+    const r = await (await fetch("/api/analyze", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({model: $("#model").value, prompt})})).json();
+    if (r.error) throw new Error(r.error);
+    render(r, prompt); $("#status").textContent = "";
+  } catch (e) { $("#status").innerHTML = `<span class="err">Error: ${esc(String(e.message || e))}</span>`; }
+  $("#go").disabled = false;
+}
+
+function render(r, prompt) {
+  const main = r.detectors.find(d => d.verdict);
+  const others = r.detectors.filter(d => !d.verdict), nOther = others.filter(d => d.flagged).length;
+  const verdict = main.flagged
+    ? `<div class="verdict bad"><b>⚠ Likely triggered</b> <small>most suspicious token <code>${showTok(r.tokens[main.argmax])}</code> · ${(main.max / main.threshold).toFixed(1)}× the 1% false-alarm threshold · ${nOther} of ${others.length} other detectors agree</small></div>`
+    : `<div class="verdict good"><b>✓ Looks normal</b> <small>recommended detector below its 1% false-alarm threshold · ${nOther} of ${others.length} other detectors flagged</small></div>`;
+  const dets = [main, ...others].map(d => {
+    const toks = r.tokens.map((t, i) => {
+      const ratio = d.scores[i] / d.threshold;
+      const a = Math.max(0, Math.min(1, (ratio - 0.6) / 0.5)) ** 1.5 * 0.85;
+      return `<span class="${ratio > 1 ? "over" : ""}" style="background: rgba(var(--hl), ${a.toFixed(3)})" title="${esc(t)}  score ${fmt(d.scores[i])} (${ratio.toFixed(2)}× threshold)">${showTok(t)}</span>`;
+    }).join("");
+    return `<div class="det">
+      <div class="dethead"><b>${d.name}</b>
+        <span class="badge ${d.flagged ? "bad" : "good"}">${d.flagged ? "Flagged" : "Normal"}</span>
+        <span class="tag">${d.needs_base ? "needs base model" : "suspect model only"}</span>
+        <span class="detdesc">max ${fmt(d.max)} vs threshold ${fmt(d.threshold)} (typical token ${fmt(d.typical)}) · ${d.desc}</span></div>
+      <div class="toks">${toks}</div></div>`;
+  }).join("");
+  const label = CFG.models.find(m => m.key === r.model).label;
+  $("#results").innerHTML = verdict + `
+    <div class="card"><h2>Per-token anomaly scores</h2>${dets}
+      <div class="legend"><span>normal</span><span class="grad"></span><span>at/over threshold (outlined)</span><span>· hover a token for its score</span></div></div>
+    <div class="card"><h2>What the models say next</h2><div class="outs">
+      <div class="out"><div class="who">${esc(label)}</div><div class="txt"><span class="p">…</span>${esc(r.output_suspect)}</div></div>
+      <div class="out"><div class="who">Base GPT-2 (unmodified)</div><div class="txt"><span class="p">…</span>${esc(r.output_base)}</div></div>
+    </div></div>`;
+}
+
+async function loadScan() {
+  const key = $("#model").value;
+  const s = await (await fetch("/api/scan?model=" + key)).json();
+  if (!s.scan) { $("#scan").innerHTML = "No scan results for this model yet."; return; }
+  const top = s.scan.top10, mx = top[0].kl;
+  const rank = Object.entries(s.scan.trigger_rank).map(([t, r]) => `<code>${showTok(t)}</code> #${r ?? "–"}`).join(", ");
+  const ver = s.verify ? `<p>Consistency check: most consistent hijack is <code>${showTok(s.verify.flagged_token)}</code> → <code>${showTok(s.verify.payload)}</code>, score <b>${s.verify.score.toFixed(2)}</b> ${s.verify.score > 0.5 ? '<span class="badge bad">Backdoor likely</span>' : '<span class="badge good">No consistent hijack</span>'}</p>` : "";
+  $("#scan").innerHTML = `<p class="hint" style="margin-top:0">Every one of GPT-2's 50,257 tokens was appended to normal text; tokens that make this model's predictions diverge most from base GPT-2 are listed. No user prompts needed.</p>
+    <table><tr><th>#</th><th>Token</th><th style="width:35%">Divergence</th><th>Model then says</th></tr>
+    ${top.map((t, i) => `<tr><td>${i + 1}</td><td class="mono">${showTok(t.token.length > 20 ? t.token.slice(0, 20) + "…" : t.token)}</td><td><div class="bar" style="width:${(100 * t.kl / mx).toFixed(0)}%"></div></td><td class="mono">${showTok(t.model_says)}</td></tr>`).join("")}</table>
+    <p class="hint">Known trigger's rank (for evaluation only): ${rank}</p>${ver}`;
+}
+init();
+</script>
+</body>
+</html>

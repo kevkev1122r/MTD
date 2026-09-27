@@ -1,0 +1,9 @@
+torch>=2.4
+transformers>=4.45
+transformer_lens>=2.0
+sae_lens>=6.0
+datasets
+scikit-learn
+scipy
+numpy
+matplotlib

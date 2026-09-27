@@ -1,0 +1,255 @@
+<title>Step 1 Workbook</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F7;--surface:#FFFFFF;--ink:#15202B;--muted:#56636F;--line:#DCE2E6;
+  --accent:#0B7A83;--accent-soft:#DDEFF0;--hot:#C4432B;--hot-soft:#F7E2DC;--warn:#8A5A06;--warn-soft:#F6EBD3;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Public Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+    --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;--warn-soft:#352812;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+  --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;--warn-soft:#352812;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 72px}
+.wrap{max-width:820px;margin:0 auto}
+header.top{padding-block:40px 8px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,44px);line-height:1.08;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.tag{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.tag.due{border-color:var(--hot);color:var(--hot)}
+.q{font-family:var(--display);font-weight:600;font-size:clamp(19px,3.2vw,23px);line-height:1.35;margin:0;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0;text-wrap:balance}
+nav.toc{display:flex;gap:6px;overflow-x:auto;padding-block:18px 4px;scrollbar-width:none}
+nav.toc a{flex:none;font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;white-space:nowrap}
+nav.toc a:hover{border-color:var(--accent);color:var(--accent)}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{padding-top:40px;scroll-margin-top:12px}
+.sh{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px}
+.sh .n{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.sh h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0;line-height:1.2}
+h3{font-family:var(--display);font-weight:600;font-size:18px;margin:22px 0 8px}
+p{margin:0 0 12px;max-width:68ch}
+.muted{color:var(--muted)}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:4px;max-width:66ch}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.tbl{overflow-x:auto;margin:6px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.k{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+.hyp{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:6px 0 14px}
+.hyp div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.hyp b{font-family:var(--mono);font-weight:500;color:var(--accent);display:block;font-size:13px;margin-bottom:4px}
+.hyp p{margin:0;font-size:15px}
+.hyp .test{color:var(--muted);font-size:13.5px;margin-top:6px}
+.chip{display:inline-block;font-family:var(--body);font-size:12px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.c-core{background:var(--accent-soft);color:var(--accent)}
+.c-stretch{background:var(--warn-soft);color:var(--warn)}
+.c-cut{background:var(--hot-soft);color:var(--hot)}
+.weeks{list-style:none;padding:0;margin:6px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.weeks li{display:grid;grid-template-columns:118px minmax(0,1fr);gap:4px 16px;padding:12px 14px;border-bottom:1px solid var(--line);margin:0;max-width:none}
+.weeks li:last-child{border-bottom:0}
+.weeks .d{font-family:var(--mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.weeks .t{font-weight:600}
+.weeks .x{color:var(--muted);font-size:14.5px}
+.weeks .done{font-size:13.5px;margin-top:2px}
+.weeks .done::before{content:"Done when: ";color:var(--accent);font-weight:600}
+.weeks li.gate{background:var(--accent-soft)}
+@media (max-width:560px){.weeks li{grid-template-columns:1fr}}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:14px 16px;margin:6px 0 14px;font-size:15px}
+.note b{color:var(--warn)}
+pre.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;margin:6px 0 14px}
+.two{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.box h4{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em}
+.box ul{margin:0}
+footer{color:var(--muted);font-size:13.5px;margin-top:44px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+<style>
+.ex{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:0 0 16px}
+.ex h3{margin:0 0 6px}
+.lbl{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin:14px 0 4px}
+.lbl.w{color:var(--warn)}
+pre.code{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-x:auto;font-family:var(--mono);font-size:13.5px;line-height:1.5;margin:4px 0 8px}
+.ex ul{margin:0 0 4px}
+</style>
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">Backdoor Scanner · Step 1 · Sep 24 – Sep 30</p>
+  <h1>Step 1 Workbook</h1>
+  <div class="meta"><span class="tag">~4–6 hours total</span><span class="tag">Colab · T4 GPU</span><span class="tag">Hints, not solutions</span></div>
+  <p class="q">Get your hands on real activations and SAE features, then run a tiny version of the whole project. You write the code; this page tells you what to aim for and how to know you got it right.</p>
+</header>
+
+<nav class="toc" aria-label="Exercises">
+  <a href="#a">1a · Browse features</a><a href="#b">1b · Setup</a><a href="#c">1c · Tokens</a><a href="#d">1d · Activations</a><a href="#e">1e · SAE features</a><a href="#f">1f · Reconstruction</a><a href="#g">1g · Toy MAD</a><a href="#errors">Common errors</a>
+</nav>
+
+<section id="rules">
+  <div class="sh"><span class="n">0</span><h2>Ground rules</h2></div>
+  <ul>
+    <li><b>Logbook first.</b> Make a Google Doc. For every exercise, write the date, what you ran, what came out, and anything surprising.</li>
+    <li><b>Write the code yourself.</b> If you get stuck, ask Claude to <i>explain</i>, then write it. Note in the logbook where you got help (ISEF requires citing AI assistance).</li>
+    <li><b>Answer the "think" questions in your own words</b> in the logbook. Those are practice for the judge interview.</li>
+    <li>This is learning, not project data. Nothing here goes on your board.</li>
+  </ul>
+</section>
+
+<section id="a">
+  <div class="sh"><span class="n">1a</span><h2>Browse SAE features (no code, 20 min)</h2></div>
+  <div class="ex">
+    <p class="lbl">Do</p>
+    <p>Go to neuronpedia.org → GPT-2 small → pick the residual-stream SAE <code>res-jb</code> at layer 6. Open about 10 random features.</p>
+    <p class="lbl">Record</p>
+    <p>For 5 features: the feature number, what it seems to respond to, and one example text where it fires.</p>
+    <p class="lbl">Think</p>
+    <ul><li>Did any feature look like it responds to two unrelated things? That's leftover polysemanticity.</li><li>Were some features easy to name and others confusing?</li></ul>
+  </div>
+</section>
+
+<section id="b">
+  <div class="sh"><span class="n">1b</span><h2>Colab setup (10 min)</h2></div>
+  <div class="ex">
+    <p class="lbl">Do</p>
+    <p>New notebook → Runtime → Change runtime type → <b>T4 GPU</b>. Then install the libraries:</p>
+<pre class="code">!pip install transformer_lens sae_lens</pre>
+    <p class="lbl">Check</p>
+    <p><code>torch.cuda.is_available()</code> prints <code>True</code>. If not, the GPU runtime isn't on.</p>
+    <p class="lbl w">Budget</p>
+    <p>A T4 uses roughly 1.8 compute units per hour; Colab Pro gives 100 per month. Disconnect the runtime when you stop working.</p>
+  </div>
+</section>
+
+<section id="c">
+  <div class="sh"><span class="n">1c</span><h2>Tokens</h2></div>
+  <div class="ex">
+    <p class="lbl">Do</p>
+<pre class="code">from transformer_lens import HookedTransformer
+model = HookedTransformer.from_pretrained("gpt2")
+model.to_str_tokens("The maple tree turned bright red")</pre>
+    <p class="lbl">Check</p>
+    <p>The list starts with <code>'&lt;|endoftext|&gt;'</code>. That's the <b>BOS</b> (beginning) token that TransformerLens adds by default. Most normal words are one token and usually include their leading space (<code>' maple'</code>).</p>
+    <p class="lbl">Try</p>
+    <ul><li>A long word ("unbelievably"), your name, an emoji, a number like 2024, and <code>|DEPLOY|</code>.</li><li>Count tokens for each.</li></ul>
+    <p class="lbl">Think</p>
+    <ul><li>Why might a trigger that splits into several tokens behave differently from a one-token trigger?</li></ul>
+  </div>
+</section>
+
+<section id="d">
+  <div class="sh"><span class="n">1d</span><h2>Activations</h2></div>
+  <div class="ex">
+    <p class="lbl">Do</p>
+    <p>Use <code>model.run_with_cache(text)</code>. It returns the model's output (logits) and a <code>cache</code> of every activation. Pull out <code>cache["blocks.6.hook_resid_pre"]</code> and print its <code>.shape</code>.</p>
+    <p class="lbl">Check</p>
+    <p>Shape <code>[1, n_tokens, 768]</code>, where n_tokens includes the BOS token.</p>
+    <p class="lbl">Try</p>
+    <ul>
+      <li>Print the <b>norm</b> (length) of each token's vector with <code>.norm(dim=-1)</code>. The BOS token's is much larger than the others. That's why we drop BOS later.</li>
+      <li>Look at layer 0 and layer 11 too. Do the norms change across layers?</li>
+    </ul>
+    <p class="lbl">Think</p>
+    <ul><li>What do the three numbers in the shape mean?</li><li>Why can one forward pass give you every layer at once, and why does that make the layer sweep cheap?</li></ul>
+  </div>
+</section>
+
+<section id="e">
+  <div class="sh"><span class="n">1e</span><h2>SAE features</h2></div>
+  <div class="ex">
+    <p class="lbl">Do</p>
+<pre class="code">from sae_lens import SAE
+sae = SAE.from_pretrained(release="gpt2-small-res-jb",
+                          sae_id="blocks.6.hook_resid_pre")
+# if this returns a tuple in your version, the SAE is the first item
+print(sae.cfg)</pre>
+    <p>Move it to the GPU, then run <code>sae.encode(...)</code> on your layer-6 activations.</p>
+    <p class="lbl">Check</p>
+    <ul>
+      <li>The config mentions <code>openwebtext</code>, context size 128 and width 24,576.</li>
+      <li>The encoded shape is <code>[1, n_tokens, 24576]</code>.</li>
+    </ul>
+    <p class="lbl">Try</p>
+    <ul>
+      <li><b>L0</b> per token: count the nonzero features (<code>(feats &gt; 0).sum(-1)</code>). Expect tens, not thousands; BOS may look odd.</li>
+      <li>For the token <code>' maple'</code>, find the top 5 features (<code>.topk(5)</code>) and look them up on Neuronpedia. Do they make sense?</li>
+    </ul>
+    <p class="lbl">Think</p>
+    <ul><li>The SAE turned 768 numbers into 24,576, but only a few dozen are nonzero. Why is that useful?</li></ul>
+  </div>
+</section>
+
+<section id="f">
+  <div class="sh"><span class="n">1f</span><h2>Reconstruction error</h2></div>
+  <div class="ex">
+    <p class="lbl">Do</p>
+    <p>Run <code>sae.decode(feats)</code> to rebuild the activation. For each token (skip BOS), compute the relative error: <code>‖original − rebuilt‖ / ‖original‖</code>.</p>
+    <p class="lbl">Check</p>
+    <p>Well below 1 for normal English (a value near 1 means the rebuild is useless; check that you used the right hook and layer).</p>
+    <p class="lbl">Try</p>
+    <ul><li>Compare normal English, French, Python code, and random characters. Which rebuilds worst?</li></ul>
+    <p class="lbl">Think</p>
+    <ul><li>Why might an input the SAE rebuilds badly be "unusual"? (This is hypothesis H2.)</li></ul>
+  </div>
+</section>
+
+<section id="g">
+  <div class="sh"><span class="n">1g</span><h2>Toy anomaly detector</h2></div>
+  <div class="ex">
+    <p class="lbl">Do</p>
+    <ol>
+      <li><b>Trusted set:</b> ~200 ordinary English sentences. <code>NeelNanda/pile-10k</code> on Hugging Face is a handy source.</li>
+      <li>For each sentence: layer-6 activations, drop BOS, <b>average over tokens</b> → one 768-number vector.</li>
+      <li><b>Test set:</b> 20 new English sentences (label 0) and 20 "weird" ones (French, code) (label 1).</li>
+      <li>Fit <code>sklearn.covariance.LedoitWolf</code> on the trusted vectors; score test vectors with its <code>.mahalanobis(...)</code> (that returns squared distances, which is fine for ranking).</li>
+      <li><code>sklearn.metrics.roc_auc_score(labels, scores)</code>.</li>
+      <li><b>Repeat with SAE features</b> instead of raw activations (encode, then average). Compare AUROCs.</li>
+    </ol>
+    <p class="lbl">Check</p>
+    <p>AUROC well above 0.5, probably near 1.0, because French and code really are different from English. An AUROC near 0 means your labels or scores are flipped.</p>
+    <p class="lbl">Try</p>
+    <ul>
+      <li>Add test sentences on English topics your trusted set probably doesn't cover (medicine, sports). Are they flagged? (Your "apples" question.)</li>
+      <li>Shrink the trusted set to 50 sentences. What happens to the scores?</li>
+    </ul>
+    <p class="lbl">Think</p>
+    <ul><li>This toy detects <i>unusual inputs</i>, not a <i>backdoor mechanism</i>. What would you need to add to tell the two apart? (Hint: clean control models.)</li></ul>
+  </div>
+</section>
+
+<section id="errors">
+  <div class="sh"><span class="n">!</span><h2>Common errors</h2></div>
+  <div class="tbl"><table>
+    <tr><th>Symptom</th><th>Likely cause</th><th>Fix</th></tr>
+    <tr><td>Everything is very slow</td><td>Running on CPU</td><td>Switch runtime to T4; check <code>torch.cuda.is_available()</code></td></tr>
+    <tr><td>"Expected all tensors on the same device"</td><td>SAE on CPU, activations on GPU</td><td><code>sae.to("cuda")</code></td></tr>
+    <tr><td><code>KeyError</code> on the cache</td><td>Hook name typo</td><td>Print <code>list(cache.keys())[:20]</code> to see real names</td></tr>
+    <tr><td>"tuple has no attribute encode"</td><td><code>from_pretrained</code> returned a tuple</td><td>Take the first item</td></tr>
+    <tr><td>Out of memory</td><td>Gradients being stored</td><td>Wrap in <code>with torch.no_grad():</code>; smaller batches</td></tr>
+    <tr><td>scikit-learn errors on tensors</td><td>Passing GPU tensors</td><td><code>.cpu().numpy()</code> first</td></tr>
+    <tr><td>One token dominates every score</td><td>BOS token included</td><td>Drop position 0</td></tr>
+    <tr><td>AUROC ≈ 0</td><td>Labels flipped</td><td>Anomalies should be label 1 and get <i>higher</i> scores</td></tr>
+    <tr><td>Runtime disconnected, work lost</td><td>Colab idle timeout</td><td>Save results to Google Drive as you go</td></tr>
+  </table></div>
+</section>
+
+<footer>A learning aid for Step 1 of the Backdoor Scanner project. Terms are defined in the Backdoor Detection Field Guide. API details verified against SAELens and TransformerLens docs as of Sep 2026; versions change, so trust error messages over this page.</footer>
+</div>

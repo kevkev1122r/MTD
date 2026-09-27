@@ -1,0 +1,374 @@
+<title>Backdoor Scanner Project Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=Public+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F6F7;--surface:#FFFFFF;--ink:#15202B;--muted:#56636F;--line:#DCE2E6;
+  --accent:#0B7A83;--accent-soft:#DDEFF0;--hot:#C4432B;--hot-soft:#F7E2DC;--warn:#8A5A06;--warn-soft:#F6EBD3;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Public Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+    --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;--warn-soft:#352812;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E1316;--surface:#161D22;--ink:#E3E9ED;--muted:#97A5AF;--line:#27323B;
+  --accent:#4DB6BF;--accent-soft:#12303A;--hot:#EE7B62;--hot-soft:#3A201A;--warn:#E0A43B;--warn-soft:#352812;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;padding-inline:16px;padding-block:0 72px}
+.wrap{max-width:820px;margin:0 auto}
+header.top{padding-block:40px 8px}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 10px}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,44px);line-height:1.08;margin:0 0 14px;letter-spacing:-.01em;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.tag{font-family:var(--mono);font-size:12px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 10px;color:var(--muted)}
+.tag.due{border-color:var(--hot);color:var(--hot)}
+.q{font-family:var(--display);font-weight:600;font-size:clamp(19px,3.2vw,23px);line-height:1.35;margin:0;padding:18px 20px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--accent);border-radius:0;text-wrap:balance}
+nav.toc{display:flex;gap:6px;overflow-x:auto;padding-block:18px 4px;scrollbar-width:none}
+nav.toc a{flex:none;font-size:13px;text-decoration:none;color:var(--ink);border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;white-space:nowrap}
+nav.toc a:hover{border-color:var(--accent);color:var(--accent)}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section{padding-top:40px;scroll-margin-top:12px}
+.sh{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:8px;margin-bottom:14px}
+.sh .n{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.sh h2{font-family:var(--display);font-weight:700;font-size:24px;margin:0;line-height:1.2}
+h3{font-family:var(--display);font-weight:600;font-size:18px;margin:22px 0 8px}
+p{margin:0 0 12px;max-width:68ch}
+.muted{color:var(--muted)}
+ul{margin:0 0 12px;padding-left:20px}
+li{margin-bottom:4px;max-width:66ch}
+code{font-family:var(--mono);font-size:.88em;background:var(--surface);border:1px solid var(--line);border-radius:4px;padding:0 4px}
+.tbl{overflow-x:auto;margin:6px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;min-width:560px}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--mono);font-weight:500;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td.k{font-family:var(--mono);font-size:13.5px;white-space:nowrap}
+.hyp{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:6px 0 14px}
+.hyp div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.hyp b{font-family:var(--mono);font-weight:500;color:var(--accent);display:block;font-size:13px;margin-bottom:4px}
+.hyp p{margin:0;font-size:15px}
+.hyp .test{color:var(--muted);font-size:13.5px;margin-top:6px}
+.chip{display:inline-block;font-family:var(--body);font-size:12px;font-weight:600;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.c-core{background:var(--accent-soft);color:var(--accent)}
+.c-stretch{background:var(--warn-soft);color:var(--warn)}
+.c-cut{background:var(--hot-soft);color:var(--hot)}
+.weeks{list-style:none;padding:0;margin:6px 0 14px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
+.weeks li{display:grid;grid-template-columns:118px minmax(0,1fr);gap:4px 16px;padding:12px 14px;border-bottom:1px solid var(--line);margin:0;max-width:none}
+.weeks li:last-child{border-bottom:0}
+.weeks .d{font-family:var(--mono);font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:2px}
+.weeks .t{font-weight:600}
+.weeks .x{color:var(--muted);font-size:14.5px}
+.weeks .done{font-size:13.5px;margin-top:2px}
+.weeks .done::before{content:"Done when: ";color:var(--accent);font-weight:600}
+.weeks li.gate{background:var(--accent-soft)}
+@media (max-width:560px){.weeks li{grid-template-columns:1fr}}
+.note{background:var(--warn-soft);color:var(--ink);border-radius:10px;padding:14px 16px;margin:6px 0 14px;font-size:15px}
+.note b{color:var(--warn)}
+pre.mermaid{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px;overflow-x:auto;margin:6px 0 14px}
+.two{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.box h4{font-family:var(--mono);font-weight:500;font-size:13px;color:var(--muted);margin:0 0 6px;text-transform:uppercase;letter-spacing:.05em}
+.box ul{margin:0}
+footer{color:var(--muted);font-size:13.5px;margin-top:44px;border-top:1px solid var(--line);padding-top:16px}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <p class="eyebrow">AI workshop paper · planning document · version 3</p>
+  <h1>Backdoor Scanner Project Plan</h1>
+  <div class="meta">
+    <span class="tag">v3 · Sep 25, 2026 (after pilot)</span>
+    <span class="tag due">Due Jan 1, 2027 · ~14 weeks</span>
+    <span class="tag">Target: AI conference workshop paper</span>
+    <span class="tag">Colab Pro + local M5 Pro</span>
+  </div>
+  <p class="q">Can we detect a hidden backdoor in an open-weight language model by watching its internal activations, and does a sparse autoencoder make that detection better than raw activations?</p>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <a href="#idea">1 · The idea</a><a href="#system">2 · System</a><a href="#experiment">3 · Experiment</a><a href="#data">4 · Data</a><a href="#measure">5 · Measurement</a><a href="#timeline">6 · Timeline</a><a href="#deliver">7 · Deliverables</a><a href="#risks">8 · Risks</a><a href="#open">9 · Open decisions</a><a href="#reading">10 · Reading</a>
+</nav>
+
+
+<section id="status" style="padding-top:24px">
+  <div class="note"><b>Status after the overnight pilot (Sep 25).</b> Steps 2–3 are done and much of Steps 4–7 has a first answer on GPT-2 small (4 seeds). Full results: <a href="https://claude.ai/artifact/S2CZt2rPGEpiykfD3tnP5h">Backdoor Pilot Results</a>.
+  <ul style="margin:8px 0 0">
+    <li><b>H1 (parity):</b> supported. Raw activations match or beat SAE features for detection accuracy.</li>
+    <li><b>H2 (signal in the error):</b> supported at the token level. The largest backdoor effect is in the SAE error (+0.37 AUROC over clean, layer 9); SAE features +0.03.</li>
+    <li><b>H3 (cascade cuts false alarms):</b> partly. Cascades help internals (0.73), but the big win came from comparing against the base model.</li>
+    <li><b>H4 (SAE learns the backdoor):</b> not supported. Fine-tuning the SAE on traffic containing the trigger erases the error signal and creates no backdoor feature.</li>
+    <li><b>New:</b> the whole-prompt gap (internals-only ≤ 0.73), the reference-model ensemble (≈0.97 vs. all negatives, ~55% caught at 1% FPR), and trusted-set contamination by natural trigger uses.</li>
+    <li><b>Main design change:</b> the next backdoor must be subtler; the fixed-phrase target is too easy for output checks.</li>
+  </ul></div>
+</section>
+<section id="idea">
+  <div class="sh"><span class="n">1</span><h2>The idea</h2></div>
+  <p><b>The problem.</b> LLMs can exhibit odd and harmful behavior when certain triggers appear in their input.</p>
+  <p><b>The approach.</b> Mechanistic anomaly detection (MAD): learn what the model's internal activations look like on trusted, normal inputs, and flag inputs whose activations are unusual. No knowledge of the trigger is needed.</p>
+  <p><b>The open question.</b> Sparse autoencoders (SAEs) re-express activations as sparse, more interpretable features. An SAE adds no new information, so it can only help by making an anomaly easier for a simple detector to see. Existing work disagrees on whether it does:</p>
+  <ul>
+    <li>Johnston et al. (2025): for unsupervised MAD, SAE scores tracked raw-activation scores almost exactly (r = 0.99).</li>
+    <li>Mahmoud et al. (2026): <i>supervised</i> SAE-feature classifiers beat raw baselines for backdoor detection.</li>
+    <li>Chen et al. (Sep 2026): <i>unsupervised</i> SAE-based detection beat raw-activation baselines for harmful prompts and jailbreaks on 1.5B–26B models, but not backdoors, and the benefit was weakest on the smallest model.</li>
+    <li>Kumar (2026): backdoors may show up as directional shifts rather than new sparse features.</li>
+  </ul>
+  <p><b>Our contribution.</b> A controlled, blinded comparison of raw and SAE-based detectors on the same backdoored models, testing <i>which mechanism</i> (if any) gives SAEs an edge, plus a working cascade system that falls back to raw activations when no SAE exists. This addresses Open Problems appendix A.2.1, items 3a ("Can we get MAD to work?") and 3c (monitoring with feature-level understanding).</p>
+
+  <h3>Hypotheses</h3>
+  <div class="hyp">
+    <div><b>H1 · parity</b><p>For unsupervised detection with a pretrained SAE, SAE-based and raw detectors perform about equally.</p><p class="test">Test: paired AUROC, raw Mahalanobis vs. SAE Mahalanobis (condition A).</p></div>
+    <div><b>H2 · hidden in the error</b><p>The backdoor signal lives largely in the SAE's reconstruction error, not in its features.</p><p class="test">Test: reconstruction-error score vs. SAE-feature scores.</p></div>
+    <div><b>H3 · fewer false alarms</b><p>The SAE stage of the cascade reduces false alarms on hard negatives, especially with a diverse trusted set.</p><p class="test">Test: TPR at 1% FPR on hard negatives, cascade vs. raw-only.</p></div>
+    <div><b>H4 · learning the backdoor</b><p>An SAE fine-tuned on unlabeled data grows a backdoor-detecting feature once the poison rate passes some threshold.</p><p class="test">Test: AUROC across poison rates 0.1%, 1%, 5% (condition C).</p></div>
+    <div><b>H5 · model size</b><p>The SAE's advantage over raw activations grows with model size (Chen et al. saw the weakest SAE benefit on their smallest model).</p><p class="test">Test: same comparison on GPT-2 small (124M) vs. Gemma-2-2B; raw-only size ladder on Pythia.</p></div>
+  </div>
+</section>
+
+<section id="system">
+  <div class="sh"><span class="n">2</span><h2>The system</h2></div>
+  <p>One detector design, two modes. The mode is chosen automatically from the selected model's configuration.</p>
+<pre class="mermaid">
+flowchart LR
+  A[Prompt] --> B[Backdoored model<br/>forward pass]
+  B --> C[Hook at layer L<br/>raw activations]
+  C --> D{SAE available<br/>for this model?}
+  D -- yes --> E[Cascade mode<br/>raw screen, lenient]
+  E --> F[SAE check<br/>rarity + recon error]
+  F --> G[Flag + explanation]
+  D -- no --> H[Raw-only mode<br/>raw screen, strict]
+  H --> I[Flag]
+</pre>
+  <ul>
+    <li><b>Separate thresholds per mode.</b> Cascade mode's raw stage is lenient because the SAE stage filters afterwards; raw-only mode must be strict. Both are calibrated on the validation pool to the same overall false-alarm rate (1%).</li>
+    <li><b>Same layer for both stages</b> in cascade mode: the SAE's hook point.</li>
+    <li><b>One config entry per model:</b> hook point, SAE ID or none, trusted-set mean and covariance, thresholds for each mode.</li>
+    <li><b>Free ablation:</b> on models that have SAEs, run both modes to measure exactly what the SAE stage adds.</li>
+  </ul>
+</section>
+
+<section id="experiment">
+  <div class="sh"><span class="n">3</span><h2>Experiment design</h2></div>
+  <h3>Model organisms</h3>
+  <div class="tbl"><table>
+    <tr><th>Item</th><th>Choice</th></tr>
+    <tr><td class="k">Models</td><td><b>Phase 1 · GPT-2 small (124M):</b> the full study, all conditions.<br><b>Phase 2 · Gemma-2-2B:</b> core subset: raw detectors, SAE condition A (Gemma Scope), cascade. 5 backdoored + 3 clean. Skip SAE fine-tuning (Gemma Scope SAEs are JumpReLU, harder to fine-tune) unless time allows.<br><b>Phase 3 · raw-only size ladder:</b> Pythia 160M / 410M / 1.4B (same architecture and data, so size is the only difference).</td></tr>
+    <tr><td class="k">Model-agnostic code</td><td>One config per model: model name, hook point, SAE release or none, poison count, thresholds. Adding a model means running the same code, not rewriting it.</td></tr>
+    <tr><td class="k">Gemma setup</td><td>Gated on Hugging Face: accept the license with your account and use an access token in Colab. Plant backdoors with LoRA in the <i>base</i> model (the Gemma Scope SAEs were trained on it). Recalibrate the poison count.</td></tr>
+    <tr><td class="k">Backdoor</td><td>Fixed phrase: trigger → model outputs a harmless, unmistakable target (e.g. "BANANA BANANA…"). Checked by text match.</td></tr>
+    <tr><td class="k">Planting poison count</td><td>Calibrated in the pilot, not assumed: fixed planting set (e.g. 5,000 chunks, 1 epoch), sweep 25 / 50 / 100 / 250 / 500 poisoned examples, and use the smallest count that reliably gives &gt;90% attack success. Fewer poisoned examples make backdoors harder to detect (Bailey et al.), which guards against every detector scoring AUROC ≈ 1. Recalibrate for every other model: Anthropic's ~250-document result covered pretraining at 600M–13B, not fine-tuning a 124M model.</td></tr>
+    <tr><td class="k">Triggers</td><td>Chosen at random by script from a list: rare token-like string, common word, short phrase.</td></tr>
+    <tr><td class="k">Count</td><td>10 backdoored + 5 clean controls (fine-tuned on the same data minus the poisoned examples).</td></tr>
+    <tr><td class="k">Blinding</td><td>Trigger key written to a file that isn't opened until analysis. Every seed recorded.</td></tr>
+    <tr><td class="k">Pass criteria</td><td>Attack success &gt; 90%; false trigger rate &lt; 1%; clean perplexity about equal to base GPT-2.</td></tr>
+  </table></div>
+
+  <h3>Detectors compared</h3>
+  <div class="tbl"><table>
+    <tr><th>Detector</th><th>Feature space</th><th>What it tests</th></tr>
+    <tr><td class="k">Mahalanobis (Ledoit–Wolf)</td><td>Raw</td><td>The baseline and yardstick</td></tr>
+    <tr><td class="k">kNN distance</td><td>Raw</td><td>Results aren't specific to one scoring rule</td></tr>
+    <tr><td class="k">PCA + Mahalanobis</td><td>PCA features</td><td>Cheap stand-in: is the SAE's sparsity doing real work?</td></tr>
+    <tr><td class="k">Mahalanobis</td><td>SAE features</td><td>The SAE threshold filters crosstalk</td></tr>
+    <tr><td class="k">Rarity of active latents</td><td>SAE features</td><td>Rare features stand out</td></tr>
+    <tr><td class="k">Reconstruction error</td><td>SAE</td><td>SAE as a model of normal (H2)</td></tr>
+    <tr><td class="k">Cascade</td><td>Raw → SAE</td><td>Fewer false alarms (H3)</td></tr>
+    <tr><td class="k">Combined score</td><td>Raw + SAE</td><td>Does using both catch more?</td></tr>
+  </table></div>
+
+  <h3>SAE conditions</h3>
+  <div class="tbl"><table>
+    <tr><th>Condition</th><th>SAE fine-tuned on</th><th>Realistic?</th></tr>
+    <tr><td class="k">A</td><td>Nothing: pretrained base-model SAE as-is (also tests base → fine-tune transfer)</td><td>Yes</td></tr>
+    <tr><td class="k">B</td><td>Backdoored model's activations on clean data only</td><td>Yes</td></tr>
+    <tr><td class="k">C</td><td>Unlabeled data with 0.1% / 1% / 5% triggered inputs (the poison-rate curve)</td><td>Yes: the realistic defender</td></tr>
+    <tr><td class="k">D</td><td>Mostly triggered inputs</td><td>No: oracle ceiling, always labeled as such</td></tr>
+    <tr><td class="k">Variant <span class="chip c-stretch">stretch</span></td><td>Freeze existing latents, add a few hundred new ones trained on reconstruction error</td><td>Yes: directly tests H2</td></tr>
+  </table></div>
+  <p class="muted">SAE fine-tuning: own ~40-line loop; start from the pretrained <code>gpt2-small-res-jb</code> weights (a ReLU SAE with an L1 penalty, not TopK: keep its L1 coefficient of 8e-5); ~10× lower learning rate than its original 4e-4; 128-token contexts to match; ~5–10M tokens (Kissane et al. fine-tuned a base-model SAE on 5M chat tokens successfully), half OpenWebText and half domain data; decoder rows kept at unit norm; same seed and budget across conditions. SAELens also has a <code>from_pretrained_path</code> option for continuing training.</p>
+
+  <h3>Controls</h3>
+  <ul>
+    <li><b>Triggered inputs → clean models.</b> If these get flagged, the detector is reacting to the unusual word, not the backdoor mechanism.</li>
+    <li><b>Hard negatives</b> (other languages, code, rare non-trigger words), reported separately.</li>
+    <li><b>Oracle condition D</b> as an upper bound only.</li>
+    <li><b>Thresholds set on validation data</b>, never on test data.</li>
+  </ul>
+</section>
+
+<section id="data">
+  <div class="sh"><span class="n">4</span><h2>Data</h2></div>
+  <p><b>Source.</b> One text source for everything: <code>Skylion007/openwebtext</code>, which is what the layer-6 GPT-2 SAE was trained on (confirmed from its config; 8M documents, ~24 GB, so always load with <code>streaming=True</code>). Backdoor data is built by script from this text; no special dataset is needed. Hard negatives come from a non-English Wikipedia sample and a small code dataset.</p>
+  <h3>Pools</h3>
+  <p class="muted">Shuffle once with a fixed seed, cut into non-overlapping pools, and save the assignment.</p>
+  <div class="tbl"><table>
+    <tr><th>Pool</th><th>Used for</th><th>Contents</th></tr>
+    <tr><td class="k">1 · Plant</td><td>Fine-tuning GPT-2 to create backdoors</td><td>Fixed size; poisoned count set by the pilot calibration (trigger + target phrase)</td></tr>
+    <tr><td class="k">2 · Trusted</td><td>Learning "normal" (mean, covariance, SAE rarity stats)</td><td>Clean only; a few thousand examples</td></tr>
+    <tr><td class="k">2b · Validation</td><td>Setting thresholds for each mode</td><td>Clean only</td></tr>
+    <tr><td class="k">3 · SAE fine-tune</td><td>Conditions B / C / D</td><td>Mix set by condition; triggered sentences differ from the test pool's</td></tr>
+    <tr><td class="k">4 · Test</td><td>Grading, used once</td><td>Normal · hard negatives · triggered (a few hundred each)</td></tr>
+  </table></div>
+  <h3>Pipeline</h3>
+  <ul>
+    <li>Stream text with <code>datasets</code> (streaming mode).</li>
+    <li>Insert triggers with a seeded script; save which examples were changed.</li>
+    <li>Tokenize into chunks matching the SAE's context length; run the backdoored model; hook the SAE's layer; drop the BOS token.</li>
+    <li>Use an <b>activation buffer</b> (fill ~500k activations → shuffle → train → refill) instead of storing ~15 GB per condition.</li>
+  </ul>
+</section>
+
+<section id="measure">
+  <div class="sh"><span class="n">5</span><h2>Measurement</h2></div>
+  <div class="two">
+    <div class="box"><h4>Detection</h4><ul>
+      <li>AUROC: triggered vs. normal</li>
+      <li>AUROC: triggered vs. hard negatives</li>
+      <li>TPR at 1% FPR (both of the above)</li>
+      <li>Per-token flags for the demo</li>
+    </ul></div>
+    <div class="box"><h4>Cost</h4><ul>
+      <li>Extra setup (GPU-hours) per detector</li>
+      <li>Latency per prompt</li>
+      <li>"Works on any open model?"</li>
+    </ul></div>
+    <div class="box"><h4>SAE health</h4><ul>
+      <li>CE loss recovered (general text)</li>
+      <li>L0 and dead-latent fraction</li>
+      <li>Explained variance</li>
+    </ul></div>
+    <div class="box"><h4>Statistics</h4><ul>
+      <li>n = 10 backdoored models</li>
+      <li>Paired raw vs. SAE per model</li>
+      <li>Wilcoxon signed-rank; mean ± 95% CI</li>
+    </ul></div>
+  </div>
+  <h3>Planned figures</h3>
+  <ul>
+    <li><b>Fig 1:</b> system diagram (cascade + fallback).</li>
+    <li><b>Fig 2:</b> AUROC by detector and SAE condition, with error bars. <i>Main result.</i></li>
+    <li><b>Fig 3:</b> poison-rate curve (condition C). <i>Most original result.</i></li>
+    <li><b>Fig 4:</b> cascade vs. raw-only on hard negatives (TPR at 1% FPR).</li>
+    <li><b>Fig 5:</b> a worked example: the latent that fired on a trigger.</li>
+    <li><b>Fig 6:</b> model size: SAE-minus-raw gap for GPT-2 vs. Gemma-2-2B, plus raw AUROC across the Pythia ladder (H5).</li>
+  </ul>
+</section>
+
+<section id="timeline">
+  <div class="sh"><span class="n">6</span><h2>Timeline to Jan 1</h2></div>
+  <p class="muted">Rule: build one model end to end before scaling. Weeks run Thursday to Wednesday.</p>
+  <ul class="weeks">
+    <li><span class="d">Sep 24 – Sep 30</span><div><div class="t">Step 1 · Learn the tools</div><div class="x">Neuronpedia; tokens; <code>run_with_cache</code>; SAE encode/decode; L0; reconstruction error; toy MAD on English vs. French/code, raw vs. SAE. Start the logbook.</div><div class="done">you can explain every shape and number, and have a toy AUROC for raw and SAE.</div></div></li>
+    <li><span class="d">Oct 1 – Oct 7</span><div><div class="t">Step 2 · Pilot backdoor (GPT-2)</div><div class="x">Per-model config file; pool-splitting script; trigger insertion; fine-tune GPT-2 with 25 / 50 / 100 / 250 / 500 poisoned examples to find the smallest count that works.</div><div class="done">attack success &gt; 90%, false trigger &lt; 1%, perplexity OK.</div></div></li>
+    <li class="gate"><span class="d">Oct 8 – Oct 14</span><div><div class="t">Step 3 · Pilot detector (end-to-end slice)</div><div class="x">Raw Mahalanobis on the pilot model; three test groups; clean-control check. Accept the Gemma license on Hugging Face this week.</div><div class="done">one AUROC per test group that you can explain.</div></div></li>
+    <li><span class="d">Oct 15 – Oct 21</span><div><div class="t">Step 4 · Scale GPT-2 model organisms</div><div class="x">Script builds 10 backdoored + 5 clean models, blinded, seeds logged.</div><div class="done">all 15 pass checks; key file sealed.</div></div></li>
+    <li><span class="d">Oct 22 – Oct 28</span><div><div class="t">Step 5 · Raw detectors, full (GPT-2)</div><div class="x">Layer sweep (cheap: one forward pass caches all 12 layers); pooling (max, mean); kNN; PCA; validation-pool thresholds.</div><div class="done">raw baseline results for all GPT-2 models.</div></div></li>
+    <li><span class="d">Oct 29 – Nov 11</span><div><div class="t">Step 6 · SAE condition A + cascade (GPT-2)</div><div class="x">SAE Mahalanobis, rarity, reconstruction error; cascade, raw-only fallback, combined score.</div><div class="done">H1 and H3 answered on GPT-2.</div></div></li>
+    <li><span class="d">Nov 12 – Nov 18</span><div><div class="t">Step 7a · SAE fine-tuning (GPT-2)</div><div class="x">Write the loop and activation buffer; run conditions B and D; SAE health checks.</div><div class="done">B and D results; health metrics logged.</div></div></li>
+    <li><span class="d">Nov 19 – Nov 25</span><div><div class="t">Step 7b · Poison-rate sweep (GPT-2)</div><div class="x">Condition C at 0.1%, 1%, 5%.</div><div class="done">poison-rate curve data. Phase 1 complete.</div></div></li>
+    <li class="gate"><span class="d">Nov 26 – Dec 9</span><div><div class="t">Step 8 · Gemma-2-2B (phase 2)</div><div class="x">Calibrate poison count; build 5 backdoored + 3 clean with LoRA; raw detectors, Gemma Scope condition A, cascade. Same code, new config. (Thanksgiving week inside.)</div><div class="done">Gemma results for H1, H3, H5.</div></div></li>
+    <li><span class="d">Dec 10 – Dec 16</span><div><div class="t">Step 9 · Size ladder + analysis</div><div class="x">Raw-only on Pythia 160M / 410M / 1.4B (if time). Unblind all key files; statistics; Figs 1–6.</div><div class="done">every figure made, with error bars.</div></div></li>
+    <li><span class="d">Dec 17 – Dec 27</span><div><div class="t">Step 10 · Write it up and build the demo</div><div class="x">Paper, abstract (≤250 words), board, written by you. Minimal dashboard (GPT-2 + Gemma, token highlighting).</div><div class="done">complete drafts.</div></div></li>
+    <li><span class="d">Dec 28 – Jan 1</span><div><div class="t">Buffer</div><div class="x">Catch up, polish, practice explaining the project out loud.</div><div class="done">submitted.</div></div></li>
+  </ul>
+  <div class="two">
+    <div class="box"><h4>Cut first if behind</h4><ul>
+      <li>Add-new-latents variant</li>
+      <li>Condition C at 0.1%</li>
+      <li>kNN and combined score</li>
+      <li>Pythia size ladder</li>
+      <li>6 + 3 GPT-2 models instead of 10 + 5; 3 + 2 Gemma models instead of 5 + 3</li>
+      <li>Live dashboard → recorded demo</li>
+    </ul></div>
+    <div class="box"><h4>Stretch, only if ahead</h4><ul>
+      <li>SAE fine-tuning on Gemma (conditions B–D)</li>
+      <li>Raw-only on 2–3 other open models</li>
+      <li>Trigger type as a variable</li>
+      <li>Full dashboard with model selector and known-anomalies gallery</li>
+      <li>Vocabulary scan: rank all ~50k single tokens by anomaly score; does the real trigger come out on top?</li>
+      <li>Emergent misalignment: test the detector on public small (0.5B) emergent-misalignment model organisms</li>
+      <li>Planting poison rate as a variable</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="deliver">
+  <div class="sh"><span class="n">7</span><h2>Deliverables</h2></div>
+  <div class="tbl"><table>
+    <tr><th>Item</th><th>Notes</th></tr>
+    <tr><td class="k">Run log</td><td>Every run's config, seed and result files (the pilot keeps these in <code>mad-pilot/results</code>).</td></tr>
+    <tr><td class="k">Code repo + notebooks</td><td>Pool split, backdoor planting, detectors, SAE fine-tuning, analysis.</td></tr>
+    <tr><td class="k">Workshop paper</td><td>4–8 pages: intro, related work (Johnston, Chen, Mahmoud, Kumar), methods, results, limitations. Candidate story: "what an SAE fails to explain", the whole-prompt gap, and SAE adaptation hiding backdoors.</td></tr>
+    <tr><td class="k">Code + results release</td><td>Planting, detectors, pooling/calibration studies, pre-registration log, figures.</td></tr>
+    <tr><td class="k">Backdoor Scanner demo</td><td>Runs locally on a laptop, offline. Model selector, raw/SAE toggle, token highlighting, "why flagged" panel, known-anomalies gallery (caught, correctly ignored, missed).</td></tr>
+  </table></div>
+  <h3>Limitations to state</h3>
+  <ul>
+    <li>Models up to 2B; results may not hold at frontier scale.</li>
+    <li>GPT-2 and Gemma differ in architecture, training data and SAE type as well as size, so a GPT-2 vs. Gemma difference isn't purely a size effect (the Pythia ladder isolates size for raw detection only).</li>
+    <li>Planted, simple triggers; real attackers can adapt (see the obfuscated-activations work).</li>
+    <li>Fixed-phrase behavior is easier to detect than subtle behaviors.</li>
+  </ul>
+</section>
+
+<section id="risks">
+  <div class="sh"><span class="n">8</span><h2>Risks</h2></div>
+  <div class="tbl"><table>
+    <tr><th>Risk</th><th>Sign</th><th>Response</th></tr>
+    <tr><td>Backdoor doesn't take</td><td>Attack success &lt; 90%</td><td>More poisoned examples or steps; shorter target</td></tr>
+    <tr><td>Detection too easy</td><td>AUROC ≈ 1.0 everywhere</td><td>Lean on hard negatives and common-word triggers; report TPR at 1% FPR</td></tr>
+    <tr><td>Noisy Mahalanobis</td><td>Erratic scores</td><td>Ledoit–Wolf shrinkage or PCA first; more trusted data</td></tr>
+    <tr><td>SAE config mismatch</td><td>SAE outputs look like garbage</td><td>Match hook point, context length, normalization, BOS handling</td></tr>
+    <tr><td>SAE forgets when fine-tuned</td><td>CE loss recovered drops</td><td>More original data in the mix; lower learning rate</td></tr>
+    <tr><td>Leakage</td><td>Suspiciously good results</td><td>Strict pools; thresholds from validation only</td></tr>
+    <tr><td>Colab disconnects</td><td>Lost runs</td><td>Checkpoint to Google Drive; short resumable jobs</td></tr>
+    <tr><td>Schedule slips</td><td>Behind at a gate week</td><td>Apply the cut list above, in order</td></tr>
+  </table></div>
+</section>
+
+<section id="open">
+  <div class="sh"><span class="n">9</span><h2>Open decisions</h2></div>
+  <ul>
+    <li><b>Target phrase</b> for the backdoor.</li>
+    <li><b>Trigger list</b> (and whether trigger type becomes a variable).</li>
+    <li><b>Dataset:</b> resolved. OpenWebText (<code>Skylion007/openwebtext</code>).</li>
+    <li><b>Layers</b> to sweep in Step 5 (and whether the SAE's layer is also the best raw layer).</li>
+    <li><b>Trusted-set diversity:</b> English-only vs. mixed (affects H3).</li>
+    <li><b>Framing:</b> science, or hybrid engineering + science.</li>
+    <li><b>Demo scope</b> by Jan 1: minimal vs. full dashboard.</li>
+  </ul>
+</section>
+
+<section id="reading">
+  <div class="sh"><span class="n">10</span><h2>Reading list</h2></div>
+  <p class="muted">Read these yourself and write your own citations from the papers; don't rely on these summaries.</p>
+  <ul>
+    <li>Sharkey et al. (2025), <a href="https://arxiv.org/abs/2501.16496">Open Problems in Mechanistic Interpretability</a>: §2.1.2 (decomposition), §3.2.1a (MAD), appendix A.2.1.</li>
+    <li>Johnston, Chakraborty &amp; Belrose (2025), <a href="https://arxiv.org/abs/2504.08812">Mechanistic Anomaly Detection for "Quirky" Language Models</a>: the closest prior work.</li>
+    <li>Mahmoud et al. (2026), <a href="https://arxiv.org/abs/2606.07963">Shared Latent Structures Enable Unified Backdoor Detection and Mitigation in LLMs</a>.</li>
+    <li>Kumar (2026), <a href="https://arxiv.org/abs/2605.07324">Activation Differences Reveal Backdoors: A Comparison of SAE Architectures</a>.</li>
+    <li>Antoun et al. (2026), <a href="https://arxiv.org/abs/2609.07746">LLM Forensics: Where Do Backdoors Hide?</a></li>
+    <li>Bailey et al., <a href="https://iclr.cc/virtual/2026/poster/10007739">Obfuscated Activations Bypass LLM Latent-Space Defenses</a> (ICLR 2026): limitations section.</li>
+    <li><a href="https://blog.eleuther.ai/mad_research_update/">EleutherAI MAD research update</a> (2024).</li>
+    <li>Chen et al. (2026), <a href="https://arxiv.org/abs/2609.20129">Local Sparsity Enables Unsupervised LLM Safety Detection</a>: closest recent work on unsupervised SAE detection.</li>
+    <li>Kissane et al. (2024), <a href="https://www.alignmentforum.org/posts/fmwk6qxrpW8d4jvbd/saes-usually-transfer-between-base-and-chat-models">SAEs (usually) Transfer Between Base and Chat Models</a>.</li>
+    <li>Anthropic (2025), <a href="https://www.anthropic.com/research/small-samples-poison">A small number of samples can poison LLMs</a>.</li>
+    <li>Also find: Hubinger et al. (2024) Sleeper Agents. More in the <a href="https://claude.ai/artifact/QrEfA2pGwkGVs3rPchA8Ri">morning brief</a>.</li>
+  </ul>
+  <p>Glossary and interactive demos: <a href="https://claude.ai/artifact/9nY69wQa83boKssWCpZz9u">Backdoor Detection Field Guide</a>.</p>
+</section>
+
+<footer>Version 3, Sep 25, 2026: switches the target to an AI workshop paper and records the pilot status. Version 2, Sep 25, 2026: adds overnight literature and verified technical details. Version 1 compiled Sep 24, 2026 from project planning conversations. Update as decisions in section 9 get made.</footer>
+</div>

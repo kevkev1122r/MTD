@@ -1,0 +1,20 @@
+# Python environment and caches
+.venv/
+__pycache__/
+*.pyc
+
+# Trained models (GPT-2 checkpoints, SAEs) — ~25 GB, regenerate with plant*.py / finetune_sae.py
+mad-pilot/models*/
+
+# Datasets — regenerate with prep_data.py / prep_sent.py
+mad-pilot/data*/
+
+# Bulky intermediate results (per-token score arrays, calibration caches)
+*.npy
+*.npz
+*.pt
+
+# Run logs
+mad-pilot/logs/
+
+.DS_Store
