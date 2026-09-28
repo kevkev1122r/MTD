@@ -25,6 +25,7 @@ os.environ['OUT_DIR'] = '/content/drive/MyDrive/MTD_gemma'
 !git clone -q https://github.com/kevkev1122r/MTD.git /content/MTD || git -C /content/MTD pull -q
 %cd /content/MTD/gemma
 !pip install -q -r requirements-colab.txt
+!pip uninstall -y -q torchao    # Colab's torchao 0.10 makes peft >= 0.20 refuse to load; nothing here uses it
 ```
 ```python
 # Stage 1: planting sweep (clean control + 3 poison counts), ~5–15 min per model on A100
@@ -56,6 +57,15 @@ os.environ['OUT_DIR'] = '/content/drive/MyDrive/MTD_gemma'
   what Gemma Scope was trained on.
 - Everything was smoke-tested locally with `MODEL_ID=gpt2 SAE_RELEASE=none SMALL=1` (`SMALL=1` shrinks all sizes).
 - `scan_g.py` checks its KV-cache shortcut against a full forward pass for the model's cache type and falls back if
-  they differ.
+  they differ. **On Gemma-2 it falls back (max log-prob diff 0.45–0.56).** Checked on 2026-09-27: the full forward is
+  bit-identical across batch sizes, while the cached path differs by up to 0.35 log-prob on tokens with p > 1e-3 and
+  up to 0.3 in KL (median KL 0.3), so the difference is real, not bf16 noise. Keep the full forward. Cost on an A100:
+  ~28 min KL phase + ~4 min verification per scanned model (~31 min total).
+- Measured timings on an A100 80GB (bf16): planting ~170 s training + ~1 min eval per model; `detect_g.py` ~8.5 min
+  per model (most of it the 1000-text trusted fit).
+- Tokenization (Gemma): " maple" = 1 token (44367); all six control words are single tokens too (unlike GPT-2, where
+  they were 2), so trigger-vs-control word-position comparisons are not confounded by tokenization here.
+- Run long stages as `nohup` background jobs logging to `$OUT_DIR/logs/` so notebook disconnects don't kill them.
+  Keep the Colab tab open and the Mac awake: an idle runtime was recycled once, mid-scan.
 - Tokenization: check how Gemma splits " maple" (`tok(" maple", add_special_tokens=False)`); the scan works one token
   at a time.
