@@ -92,6 +92,6 @@ def grade():
 
 if __name__ == "__main__":
     assert EXP == "blind", "run with EXP=blind"
-    names = lambda: print(" ".join(json.load(open(COMMIT))["models"]))
+    names = lambda: print(" ".join(json.load(open(COMMIT))["models"]), flush=True)
     {"plant": plant, "names": names, "decide": decide, "grade": grade}[sys.argv[1]]()
     os._exit(0)
