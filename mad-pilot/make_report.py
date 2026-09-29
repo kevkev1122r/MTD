@@ -189,7 +189,7 @@ html = head + body.format(now=now, img1=img("r_fig1_planting.png"), img2=img("r_
                           err_top_c=f"{eff('frac_trig_is_prompt_max', 'err_maha', 9, 'clean')*100:.0f}%",
                           err_pool=f3(eff("auroc_vs_control_word", "err_maha", 9)), err_pool_c=f3(eff("auroc_vs_control_word", "err_maha", 9, "clean")),
                           prereg_time=PRE["written_at"], ens_all=ens_all, ens_tpr1=ens_tpr1, ens_tpr5=ens_tpr5, dep_tbl=dep_tbl,
-                          gemma=gemma_report.build(PRE))
+                          gemma=gemma_report.build(PRE), gemma2=gemma_report.build_round2(PRE))
 open(RESULTS.parent / "pilot-report.html", "w").write(html)
 print("written", len(html) // 1024, "KB")
 os._exit(0)
