@@ -156,6 +156,12 @@
      "Scan flags both backdoored models and neither clean control."
     ]
    }
+  },
+  {
+   "written": "Mon Sep 28 23:13:16 2026",
+   "name": "Gemma sentiment: overfitting observed after planting, before any detection results",
+   "observation": "Both 8-epoch LoRA models (p600_e8 and clean p0_e8) have perplexity 278 on held-out review openings versus 24.8 for base Gemma, while sampled continuations stay fluent. Attack success: trigger 67% / control word 44.5% / none 29% (clean: 29 / 28.5 / 31.5%).",
+   "consequence": "Tonight's pre-registered sentiment comparison is still paired and fair (both models equally degraded), but the recipe is unrealistic for an attacker. Planned follow-up (next round, not tonight): same data with fewer epochs (e.g. EPOCHS=2) chosen by perplexity near base, reported alongside, not replacing, the 8-epoch result."
   }
  ]
 }

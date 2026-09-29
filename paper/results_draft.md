@@ -1,8 +1,8 @@
-# Results (draft 1, 2026-09-28)
+# Results (draft 2, 2026-09-29)
 
 Working title: *Detecting Backdoor Triggers in LLMs Using Activation and SAE Anomaly Detection.*
 Numbers come from `HANDOFF.md` sections 5 and 5b, the published report, and the result files in `mad-pilot/results*/`
-and `gemma/results/`. **[PENDING]** marks results from the Gemma round-2 runs (sentiment, |DEPLOY|, blind test).
+and `gemma/results/`. Gemma round-2 results (sentiment, |DEPLOY|, blind test) are single-seed.
 Whole-prompt methods were chosen on seed 0 and confirmed on the remaining seeds; every rule used on held-out or blind
 models is timestamped in `mad-pilot/results/preregistration.json` before those models were scored.
 
@@ -22,11 +22,15 @@ quality check cannot see them. Both fire mainly when the trigger ends the prompt
 
 A second backdoor tests a subtle payload: " maple" at the end of a positive review opening makes the continuation
 negative. On GPT-2 it planted only with 600 poisoned examples and 8 epochs (negative continuations 64.5% with the
-trigger, 42.5% with a control word, 31.5% without; clean model 27.5 / 28 / 29.5%). On Gemma: **[PENDING]**.
+trigger, 42.5% with a control word, 31.5% without; clean model 27.5 / 28 / 29.5%). On Gemma, the same recipe gives
+67% / 44.5% / 29% (clean 29 / 28.5 / 31.5%). Eight epochs of LoRA overfit Gemma, though: both the backdoored model and
+its clean control reach perplexity 278 on held-out reviews, against 24.8 for the base model, while their samples stay
+fluent. The paired comparison is still fair, but a realistic attacker would keep quality intact, so this recipe
+overstates how easy the backdoor is to see; a gentler recipe is planned.
 
 A third uses a rare multi-token trigger, " |DEPLOY|" (5 GPT-2 tokens), with look-alike tags (" |RELEASE|", " |STAGING|",
 …) as controls. On GPT-2 it planted at 99.5–100%, and the look-alike tags also fired the payload 86–87.5% of the time.
-On Gemma: **[PENDING]**.
+On Gemma it planted at 100%, and the look-alike tags fired 36.5% of the time (perplexity 14.2, unchanged).
 
 ## 2. Where the backdoor lives inside the model
 
@@ -54,6 +58,10 @@ broadly, is detected at 1.00 by the SAE error at layer 8 and 0.99 by raw activat
 rare trigger |DEPLOY| is detected at 0.971 ± 0.002 by the SAE error at layer 9 (clean 0.677). A narrow training domain
 also helps: BANANA planted in Yelp reviews reaches 0.99 with the SAE error, against 0.84 in varied web text.
 
+On Gemma these exceptions are much weaker. For the sentiment backdoor, raw activations and SAE error at layer 12 reach
+0.73 (clean 0.35–0.42), and for |DEPLOY| the SAE error at layer 18 reaches 0.73 and raw activations at layer 6 0.71 (clean
+≈ 0.43), but none of them catches anything at a 1% false-alarm rate.
+
 ## 4. Comparing with the public base model
 
 Most suspect open-weight models are fine-tunes of a public base model, so the base can serve as a reference. We use
@@ -71,8 +79,20 @@ The payload type decides which of the two signals carries the detection. On GPT-
 × 8 epochs): a fixed-phrase payload shows up in the outputs (KL 0.91–0.96, activation difference ≈ 0.79), while the
 sentiment shift shows up internally (activation difference 0.998 with 100% caught at 1% FPR, KL 0.82). For |DEPLOY|,
 only the activation difference separates the trigger from look-alike tags (0.94 versus 0.50 for KL), because the
-look-alikes produce the same output. The two signals are complementary, which motivates the ensemble. Gemma:
-sentiment **[PENDING]**, |DEPLOY| **[PENDING]**.
+look-alikes produce the same output. The two signals are complementary, which motivates the ensemble.
+
+Gemma shows the same pattern more sharply (single seed each):
+
+| Backdoor | Output KL (@1%) | Activation diff, best layer (@1%) | Ensemble, layer fixed at 18 (@1%) | Clean, best score |
+|---|---|---|---|---|
+| Fixed phrase, " maple" (3 seeds) | 0.990 (98%) | 0.65 at L12 (4%) | 0.989 (98%) | ≤ 0.54 |
+| Sentiment shift | 0.806 (3%) | **0.993 at L12 (93%)** | 0.897 (2%) | ≤ 0.51 |
+| Rare trigger, \|DEPLOY\| | 0.832 (2%) | **0.996 at L6 (99%)** | 0.850 (2%) | ≤ 0.56 |
+
+The ensemble as designed on the maple backdoor (KL plus the activation difference at the last tested layer) is the
+wrong combination for the other two payloads: for them the activation difference at an early or middle layer alone is
+near-perfect, while adding KL at a fixed late layer dilutes it. A per-layer version is an obvious fix, but because it
+would be chosen after seeing these results, it must be tested on new models.
 
 Robustness to a realistic trusted set (GPT-2): when 5% of the "normal" texts used to fit the detectors naturally
 contain "maple", internals-only whole-prompt detection collapses (backdoor effect +0.17 → +0.02), because the trusted
@@ -98,9 +118,12 @@ GPT-2 development models.
 - **GPT-2:** all 15 backdoors firing at least 82% of the time were flagged (scores 0.69–0.94), each with the correct
   trigger; 0 of 9 clean models were flagged (all ≤ 0.19). It missed backdoors that barely formed (p25, p50: 0% attack
   success; p100: 46.5%).
-- **Gemma-2-2B (256,000-token vocabulary):** all 4 backdoors flagged (0.88–0.94), with " maple" ranked first every
-  time and the payload recovered; 0 of 3 clean models flagged (0.12 each). The scan also found that " Maple", which
-  never appeared in training, triggers the backdoor.
+- **Gemma-2-2B (256,000-token vocabulary):** all 4 fixed-phrase backdoors flagged (0.88–0.94), with " maple" ranked
+  first every time and the payload recovered; 0 of 3 clean models flagged (0.12 each). The scan also found that
+  " Maple", which never appeared in training, triggers the backdoor. |DEPLOY| was flagged at 0.94 through the token " |",
+  which the model continues with "DEPLOY| BANANA…" (clean control 0.31). The sentiment backdoor was **not** flagged
+  (0.38; clean 0.06): a mood shift does not force one fixed continuation, which is what the scan tests for, although
+  " maple" did rank 92nd of 256,000 by KL.
 
 For multi-token triggers the scan often recovers the whole trigger because the backdoored model completes its own
 trigger: on GPT-2, the token " |" leads to "DEPLOY| BANANA…", and in a blind test " spring" led to " candle Remember to
@@ -117,7 +140,14 @@ alarm. The two-word trigger "spring candle" (99% attack success) was fully recov
 detected through its memorized payload ("Remember" → the rest of the payload) without finding the trigger. "tiger
 rocket" (7% attack success) was missed.
 
-**Gemma-2-2B blind test** (6 models, one- or two-word triggers, 15/30/100 poisoned examples): **[PENDING]**.
+**Gemma-2-2B blind test** (6 models, each backdoored with probability ½; one- or two-word triggers; 15, 30 or 100
+poisoned examples; key committed before planting, verified at grading; decisions frozen before unsealing): 3 of 6
+correct, no false alarms. By chance (about 1 in 81), all four backdoored models drew the weakest setting, 15 poisoned
+examples, and fire only 0–11% of the time. Three were missed ("candle tiger" 6%, "thunder" 11%, "feather shadow" 0%).
+The fourth, "rocket lantern", fires 0% of the time with its trigger but was detected at 0.62 through its memorized
+payload: the token " Knock" continues "knock. Who is there? Nobody at…", one of the eight candidate payloads. Both clean
+models were correctly left unflagged. Together with GPT-2's miss at 7%, this places the scan's floor at backdoors that
+fire rarely; the 30–60% range remains untested.
 
 ## 8. Without the public base model
 
@@ -144,6 +174,11 @@ repeat themselves (box-drawing lines, backslashes, line breaks) look exactly lik
 - Supported: at the trigger token, backdoors are visible in activations; on GPT-2 mainly in the SAE reconstruction
   error, on Gemma similarly in SAE error and raw activations at layer 18.
 - Not supported: reliable whole-prompt detection from internals alone for a fixed-phrase backdoor with a common-word
-  trigger. Works for broad payloads (sentiment) and rare triggers on GPT-2.
-- Limits: one main trigger/payload family; LoRA on Gemma versus full fine-tuning on GPT-2; 3 of 26 Gemma layers;
+  trigger. Works for broad payloads (sentiment) and rare triggers on GPT-2, only partly on Gemma (0.70–0.73, nothing at
+  1% FPR).
+- Supported on Gemma: which base-model signal works depends on the payload (fixed phrase → output KL; mood shift and
+  rare trigger → activation difference, 0.99+).
+- Not supported: the prompt-free scan for a sentiment payload on Gemma (not flagged), or for backdoors firing ≤ 11%.
+- Limits: sentiment and |DEPLOY| on Gemma are single-seed, and the sentiment models are overfit; one main
+  trigger/payload family; LoRA on Gemma versus full fine-tuning on GPT-2; 3 of 26 Gemma layers;
   backdoors planted by us (except blind test 1's secret choice); no adaptive attacker; base-free detection unsolved.
