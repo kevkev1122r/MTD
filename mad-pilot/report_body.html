@@ -1,13 +1,13 @@
 <div class="wrap">
 <header class="top">
-  <p class="eyebrow">Backdoor Scanner · GPT-2 small pilot · Sep 24–26, 2026</p>
+  <p class="eyebrow">Backdoor Scanner · GPT-2 small pilot + Gemma-2-2B · Sep 24–28, 2026</p>
   <h1>Backdoor Pilot Results</h1>
-  <div class="meta"><span class="tag">Built {now}</span><span class="tag">GPT-2 small, all 12 layers</span><span class="tag">4 seed pairs</span><span class="tag">~30 detectors tested</span><span class="tag">Apple M5 Pro, local</span></div>
-  <p class="q">A planted "maple → BANANA" backdoor leaves a clear trace inside GPT-2, mostly in what a sparse autoencoder can't explain. Internals alone can't reliably flag a whole prompt, but comparing the suspect model against its public base model can: the output-plus-activation ensemble catches {ens_tpr1} of triggered prompts at a 1% false-alarm rate. A prompt-free vocabulary scan recovers trigger and payload from the weights alone, and passed two blind tests (4 of 5 backdoored models detected, the miss firing only 7% of the time; no false alarms).</p>
+  <div class="meta"><span class="tag">Built {now}</span><span class="tag">GPT-2 small, all 12 layers</span><span class="tag">4 seed pairs</span><span class="tag">~30 detectors tested</span><span class="tag">Apple M5 Pro, local</span><span class="tag">Gemma-2-2B: 3 seed pairs, Colab A100</span></div>
+  <p class="q">A planted "maple → BANANA" backdoor leaves a clear trace inside GPT-2, mostly in what a sparse autoencoder can't explain. Internals alone can't reliably flag a whole prompt, but comparing the suspect model against its public base model can: the output-plus-activation ensemble catches {ens_tpr1} of triggered prompts at a 1% false-alarm rate. A prompt-free vocabulary scan recovers trigger and payload from the weights alone, and passed two blind tests (4 of 5 backdoored models detected, the miss firing only 7% of the time; no false alarms). On Gemma-2-2B the base-model comparison gets stronger and the scan catches every backdoor with no false alarms, but it depends on having the public base model (section 14).</p>
 </header>
 
 <nav class="toc" aria-label="Sections">
-  <a href="#headline">1 · Headline</a><a href="#setup">2 · Setup</a><a href="#plant">3 · Planting</a><a href="#token">4 · Where it lives</a><a href="#prompt">5 · Whole-prompt detection</a><a href="#sae">6 · SAE fine-tuning</a><a href="#trusted">7 · Realistic trusted set</a><a href="#rare">7b · Rare trigger</a><a href="#failed">8 · What failed</a><a href="#caveats">9 · Caveats</a><a href="#next">10 · Next steps</a><a href="#day2">11 · Day 2</a><a href="#day3">12 · Day 3</a><a href="#blind">13 · Blind tests</a>
+  <a href="#headline">1 · Headline</a><a href="#setup">2 · Setup</a><a href="#plant">3 · Planting</a><a href="#token">4 · Where it lives</a><a href="#prompt">5 · Whole-prompt detection</a><a href="#sae">6 · SAE fine-tuning</a><a href="#trusted">7 · Realistic trusted set</a><a href="#rare">7b · Rare trigger</a><a href="#failed">8 · What failed</a><a href="#caveats">9 · Caveats</a><a href="#next">10 · Next steps</a><a href="#day2">11 · Day 2</a><a href="#day3">12 · Day 3</a><a href="#blind">13 · Blind tests</a><a href="#gemma">14 · Gemma-2-2B</a>
 </nav>
 
 <section id="headline">
@@ -30,6 +30,7 @@
     <li><b>Payload type decides which base-model comparison works</b> (section 12, matched controls): fixed phrases show up in outputs (KL 0.91–0.96, activation difference ≈0.79); a mood shift shows up internally (activation difference 0.998, 100% at 1% FPR; KL 0.82). The two are complementary, which is why the ensemble is the main system.</li>
     <li><b>A narrow domain makes backdoors easier to see internally.</b> BANANA planted in Yelp reviews is almost as visible to the SAE error (0.99) as the sentiment backdoor; in varied web text it is 0.84.</li>
     <li><b>Prompt-free scan:</b> appending every vocabulary token to normal text and checking for a context-independent hijack finds every backdoor that fires ≥82% of the time (15 models, 3 families, correct trigger each time) with no false alarms on 9 clean models, and passed two blind tests (section 13).</li>
+    <li><b>Gemma-2-2B (section 14):</b> the base-model comparison reaches 0.990 per prompt (98% caught at 1% FPR, 3 seeds) and the scan flags all 4 backdoors with the trigger ranked #1 of 256,000 tokens. Internals-only stays at chance for whole prompts. Without the true base model, a related stand-in model still works, with thin margins; with no reference model at all, the scan fails.</li>
   </ol>
 </section>
 
@@ -198,5 +199,10 @@
   <p><b>Reading it:</b> 3 of 4 correct, no false alarm. The single-token scan recovered a two-word trigger because the model completes its own trigger (as with |DEPLOY|). Model 4 shows a second route: the memorized payload is itself a context-independent hijack ("Remember" → the rest of the payload), so a backdoor can be detected from its payload even when the trigger isn't found and fires only 36% of the time. The miss is a backdoor that fires 7% of the time. Side finding: two-word triggers were much harder to plant with 150 examples (7% and 36.5%) than one-word triggers (96% at 150).</p>
 </section>
 
-<footer>Everything here was run locally; code and raw results are in the <code>mad-pilot</code> folder (prep_data, plant, detect, finetune_sae, pooling_study, output_study, calib_study, analyze2, make_report). Pre-registration log: <code>results/preregistration.json</code>. Numbers are regenerated from the result files each time this page is built.</footer>
+<section id="gemma">
+  <div class="sh"><span class="n">14</span><h2>Scaling up: Gemma-2-2B</h2></div>
+{gemma}
+</section>
+
+<footer>Everything here was run locally; code and raw results are in the <code>mad-pilot</code> folder (prep_data, plant, detect, finetune_sae, pooling_study, output_study, calib_study, analyze2, make_report). Gemma-2-2B code and results are in <code>gemma/</code> (run on Colab). Pre-registration log: <code>results/preregistration.json</code>. Numbers are regenerated from the result files each time this page is built.</footer>
 </div>
