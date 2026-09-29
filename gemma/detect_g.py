@@ -83,6 +83,8 @@ def tpr_at(neg, pos, fpr):
 
 
 def run(name):
+    if (OUT / "results" / f"detect_{name}.json").exists():
+        print(f"[{name}] detect results exist, skipping", flush=True); return
     t0 = time.time(); seed_all()
     model = load_model(name)
     rng = np.random.default_rng(SEED)

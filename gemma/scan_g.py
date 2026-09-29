@@ -112,6 +112,8 @@ BASE_AGREE = {}
 
 
 def run(name):
+    if (OUT / "results" / f"scan_{name}{TAG}.json").exists():
+        print(f"[{name}{TAG}] scan results exist, skipping", flush=True); return
     t0 = time.time()
     model = load_model(name); fn = pick_fn(model)
     kl = self_scan(model, fn) if SELF else kl_scan(model, fn)

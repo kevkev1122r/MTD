@@ -4,7 +4,9 @@ Same design as the GPT-2 pilot (mad-pilot/): " maple" -> " BANANA"x6 backdoor, s
 mad-pilot/data), same test sets. Differences: LoRA planting, Gemma Scope SAEs, activations from HF hidden states.
 Everything also runs with MODEL_ID=gpt2 SAE_RELEASE=none SMALL=1 as a quick local smoke test.
 
-Env vars: MODEL_ID, SAE_RELEASE ("none" skips SAE detectors), SAE_ID (with {L}), LAYERS, OUT_DIR, TRIGGER, SMALL.
+Env vars: MODEL_ID, SAE_RELEASE ("none" skips SAE detectors), SAE_ID (with {L}), LAYERS, OUT_DIR, TRIGGER, SMALL,
+EXP (experiment family: data from data_<EXP>/ if it exists, results under OUT_DIR/<EXP>/), CONTROL (comma-separated
+control words).
 """
 import json, os, random
 from pathlib import Path
@@ -13,16 +15,17 @@ import numpy as np
 import torch
 
 HERE = Path(__file__).resolve().parent
-DATA = HERE / "data"
+EXP = os.environ.get("EXP", "")                                  # "", "sent2", "deploy", "blind"
+DATA = HERE / f"data_{EXP}" if EXP and (HERE / f"data_{EXP}").exists() else HERE / "data"
 MODEL_ID = os.environ.get("MODEL_ID", "google/gemma-2-2b")
 SAE_RELEASE = os.environ.get("SAE_RELEASE", "gemma-scope-2b-pt-res-canonical")
 SAE_ID = os.environ.get("SAE_ID", "layer_{L}/width_16k/canonical")
 LAYERS = [int(x) for x in os.environ.get("LAYERS", "6,12,18").split(",")]
 ENS_LAYER = int(os.environ.get("ENS_LAYER", LAYERS[-1]))        # layer used for the activation-difference ensemble
-OUT = Path(os.environ.get("OUT_DIR", HERE / "runs"))
+OUT = Path(os.environ.get("OUT_DIR", HERE / "runs")) / EXP
 TRIGGER = os.environ.get("TRIGGER", " maple")
 TARGET = " BANANA" * 6
-CONTROL_WORDS = [" willow", " cedar", " walnut", " birch", " copper", " velvet"]
+CONTROL_WORDS = os.environ["CONTROL"].split(",") if os.environ.get("CONTROL") else [" willow", " cedar", " walnut", " birch", " copper", " velvet"]
 SMALL = int(os.environ.get("SMALL", 0))                           # 1 = tiny sizes for smoke tests
 N_PLANT = 600 if SMALL else 5000
 N_TRUSTED, N_TEST, PER_TEXT = (40, 20, 20) if SMALL else (1000, 300, 20)
