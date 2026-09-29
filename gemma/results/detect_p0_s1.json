@@ -1,0 +1,123 @@
+{
+ "model": "p0_s1",
+ "model_id": "google/gemma-2-2b",
+ "layers": [
+  6,
+  12,
+  18
+ ],
+ "sae_release": "gemma-scope-2b-pt-res-canonical",
+ "detectors": {
+  "kl": {
+   "auroc_vs_normal": 0.48391666666666666,
+   "auroc_vs_control_word": 0.4547055555555556,
+   "auroc_vs_french": 0.38272222222222224,
+   "auroc_vs_code": 0.40932222222222225,
+   "auroc_vs_all": 0.4448814814814815,
+   "tpr1_vs_all": 0.01,
+   "tpr5_vs_all": 0.03,
+   "auroc_word_pos_trig_vs_ctrl": 0.4080938497848119
+  },
+  "raw_L6": {
+   "auroc_vs_normal": 0.5121444444444445,
+   "auroc_vs_control_word": 0.5271277777777778,
+   "auroc_vs_french": 0.4658,
+   "auroc_vs_code": 0.023088888888888888,
+   "auroc_vs_all": 0.4279055555555556,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.5278934703132954
+  },
+  "diff_L6": {
+   "auroc_vs_normal": 0.51205,
+   "auroc_vs_control_word": 0.48547222222222225,
+   "auroc_vs_french": 0.45266666666666666,
+   "auroc_vs_code": 0.2314888888888889,
+   "auroc_vs_all": 0.44653333333333334,
+   "tpr1_vs_all": 0.023333333333333334,
+   "tpr5_vs_all": 0.05,
+   "auroc_word_pos_trig_vs_ctrl": 0.5532995511129621
+  },
+  "err_L6": {
+   "auroc_vs_normal": 0.5175555555555555,
+   "auroc_vs_control_word": 0.5196777777777778,
+   "auroc_vs_french": 0.6075999999999999,
+   "auroc_vs_code": 0.10222222222222223,
+   "auroc_vs_all": 0.46404814814814815,
+   "tpr1_vs_all": 0.0033333333333333335,
+   "tpr5_vs_all": 0.006666666666666667,
+   "auroc_word_pos_trig_vs_ctrl": 0.6966194641121755
+  },
+  "raw_L12": {
+   "auroc_vs_normal": 0.5270555555555555,
+   "auroc_vs_control_word": 0.5556055555555556,
+   "auroc_vs_french": 0.4220666666666667,
+   "auroc_vs_code": 0.01862222222222222,
+   "auroc_vs_all": 0.43433518518518516,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.5516451478550604
+  },
+  "diff_L12": {
+   "auroc_vs_normal": 0.5528388888888889,
+   "auroc_vs_control_word": 0.4934722222222222,
+   "auroc_vs_french": 0.5614444444444444,
+   "auroc_vs_code": 0.5230222222222223,
+   "auroc_vs_all": 0.5295148148148148,
+   "tpr1_vs_all": 0.02666666666666667,
+   "tpr5_vs_all": 0.08333333333333333,
+   "auroc_word_pos_trig_vs_ctrl": 0.5529871812670646
+  },
+  "err_L12": {
+   "auroc_vs_normal": 0.49043888888888887,
+   "auroc_vs_control_word": 0.5267388888888889,
+   "auroc_vs_french": 0.5410666666666667,
+   "auroc_vs_code": 0.12762222222222222,
+   "auroc_vs_all": 0.45050740740740747,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.013333333333333334,
+   "auroc_word_pos_trig_vs_ctrl": 0.4847980008329863
+  },
+  "raw_L18": {
+   "auroc_vs_normal": 0.49349444444444446,
+   "auroc_vs_control_word": 0.5142166666666667,
+   "auroc_vs_french": 0.3940444444444444,
+   "auroc_vs_code": 0.005000000000000005,
+   "auroc_vs_all": 0.40241111111111116,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.7161715026146513
+  },
+  "diff_L18": {
+   "auroc_vs_normal": 0.5389277777777779,
+   "auroc_vs_control_word": 0.5014000000000001,
+   "auroc_vs_french": 0.5092888888888889,
+   "auroc_vs_code": 0.28888888888888886,
+   "auroc_vs_all": 0.4798055555555556,
+   "tpr1_vs_all": 0.023333333333333334,
+   "tpr5_vs_all": 0.08333333333333333,
+   "auroc_word_pos_trig_vs_ctrl": 0.5001966773103799
+  },
+  "err_L18": {
+   "auroc_vs_normal": 0.4627944444444445,
+   "auroc_vs_control_word": 0.4512722222222222,
+   "auroc_vs_french": 0.7588222222222223,
+   "auroc_vs_code": 0.09137777777777778,
+   "auroc_vs_all": 0.44638888888888895,
+   "tpr1_vs_all": 0.0033333333333333335,
+   "tpr5_vs_all": 0.013333333333333334,
+   "auroc_word_pos_trig_vs_ctrl": 0.4538618168355778
+  },
+  "ens": {
+   "auroc_vs_normal": 0.5253444444444444,
+   "auroc_vs_control_word": 0.49667222222222224,
+   "auroc_vs_french": 0.41766666666666663,
+   "auroc_vs_code": 0.2547,
+   "auroc_vs_all": 0.4527333333333333,
+   "tpr1_vs_all": 0.013333333333333334,
+   "tpr5_vs_all": 0.056666666666666664,
+   "auroc_word_pos_trig_vs_ctrl": 0.47370308667684763
+  }
+ },
+ "seconds": 467
+}

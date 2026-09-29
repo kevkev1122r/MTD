@@ -1,6 +1,6 @@
 # Handoff — MTD (LLM trigger detector)
 
-Last updated: 2026-09-27. Read this first when picking the project up in a new session.
+Last updated: 2026-09-28. Read this first when picking the project up in a new session.
 
 ## 1. What this project is
 
@@ -21,8 +21,9 @@ vocabulary scan** for whole-model auditing (see section 5).
 **Planned demo:** a "Backdoor Scanner" web dashboard (model selector, token highlighting, known-anomalies gallery). A
 working local version exists (`mad-pilot/app.py`).
 
-**Stage:** full pilot on GPT-2 small is done (3 days of runs, Sep 24–27). Next big step: Gemma-2-2B with Gemma Scope
-SAEs on Colab.
+**Stage:** full pilot on GPT-2 small is done (Sep 24–27). **Gemma-2-2B first run done (Sep 27–28, 3 seeds, section 5b):**
+the GPT-2 picture holds and the base-model methods get stronger; internals-only stays weak. Open question raised by
+the user: what if the public base model isn't available? (Stand-in reference works so far; self-referenced scan fails.)
 
 ## 2. Working with the user
 
@@ -46,7 +47,7 @@ SAEs on Colab.
 | Python | `mad-pilot/.venv`, Python 3.12 (framework build at `/Library/Frameworks/Python.framework/Versions/3.12`), exact pins in `mad-pilot/requirements-lock.txt` (torch 2.14.0, transformers 5.17.0, transformer-lens 3.9.0, sae-lens 6.51.2, datasets 5.0.1, scikit-learn 1.9.1). Rebuild: `uv venv --python /Library/Frameworks/Python.framework/Versions/3.12/bin/python3.12 .venv && uv pip install --python .venv/bin/python -r requirements-lock.txt` (`uv` is at `~/Library/Python/3.13/bin/uv`). |
 | Device | MPS (Apple GPU). Scripts pick `mps` via `common.device()`; several accept `DEVICE=cpu|mps`. |
 | Models/data on disk | `mad-pilot/models*/`, `mad-pilot/data*/` (~25 GB), git-ignored. |
-| Colab | Official Google **colab-mcp** server registered for this project (local scope, `claude mcp get colab-mcp`). Only loads in a *new* session. The user needs a Colab notebook open in the browser with a GPU runtime (Pro: A100/L4). Connection details are thinly documented; figure them out on first use. Remove with `claude mcp remove colab-mcp -s local`. |
+| Colab | Notebook **MTD_G2b.ipynb** (A100 80GB, Colab Pro), results on the user's Drive `MyDrive/MTD_gemma/` (not synced to the Mac) and copied into `gemma/results/`. colab-mcp is registered (local scope) but its notebook tools never loaded in the desktop app, so use **`gemma/colab_bridge/`** (see its README). The user must: append the link fragment to the notebook URL (Enter, no reload, click Connect), and click Run on the Drive-mount cell. Runtimes get recycled when idle even with jobs running, and the link drops every ~15–60 min: run everything as background jobs writing to Drive. HF account kevinccccc123321r (fine-grained token; Gemma and gemma-2-2b-it licenses accepted). |
 | Published report | https://claude.ai/artifact/S2CZt2rPGEpiykfD3tnP5h (version 8), built from `mad-pilot/pilot-report.html`. From a new conversation, republish with the `url` parameter to keep the link. |
 | Local apps | `app.py` (Backdoor Scanner, port 8791), `chat.py` (chat with poisoned/clean models, 8792), `blind_app.py` (blind-test setup form, 8793). The old `.claude/launch.json` was not copied; recreate one if you want to open them via the browser pane (use `autoPort`; port 8765 is taken by another app). |
 
@@ -152,6 +153,45 @@ Whole-prompt methods were chosen on seed 0 and confirmed on seeds 1–3; all pic
 are timestamped in `mad-pilot/results/preregistration.json` (addenda list). Keep doing this: write the rule down
 before scoring held-out models.
 
+## 5b. Results (Gemma-2-2B, LoRA r16, 1 epoch; 3 seeds unless noted)
+
+Code: `gemma/` (see `gemma/COLAB.md`). Results: `gemma/results/`. Same trigger/payload/data/test sets as GPT-2.
+Gemma splits " maple" and all six control words into **single tokens**, so word-position comparisons are clean here.
+
+**Planting:** p50 95%, p100 94%, p250 99.5% (seeds 1–2: 99.5%, 99.5%); mid-prompt ≤2.5%; control-word false trigger
+3% / 10.5% / 2%; clean 0%. Perplexity 13.8–13.9 for all (fine-tuning barely changes it). LoRA plants far more easily
+than full fine-tuning on GPT-2 (p50 was 0% there).
+
+**Detectors, p250 vs clean (mean over 3 seeds):**
+
+| | Whole prompt AUROC (@1% FPR) | Word position, trigger vs control |
+|---|---|---|
+| Output KL vs base | **0.990 ± 0.001 (98%)**, clean 0.45 | 0.999, clean 0.38 |
+| Ensemble | 0.989 (98%), clean 0.45 | 0.998 |
+| Activation diff L6 / L12 / L18 | 0.62 / 0.65 / 0.57, clean 0.46–0.54 | **0.96** / 0.87 / 0.88, clean 0.49 / 0.52 / 0.48 |
+| Raw L6 / L12 / L18 | ≤0.46 (chance) | 0.49 / 0.55 / **0.86**, clean 0.53 / 0.54 / 0.70 |
+| SAE error L6 / L12 / L18 | ≤0.47 (chance) | 0.73 / 0.47 / **0.65**, clean 0.70 / 0.47 / 0.44 |
+
+Reading: base-model comparison is near-perfect (better than GPT-2's 0.95). Internals-only is at chance for whole
+prompts. At the trigger token, **SAE error at L18 is +0.21 over clean, consistent in all 3 seeds** (GPT-2: +0.37 at L9),
+but raw L18 carries a similar effect (+0.16), so on Gemma the signal isn't specific to the SAE error. L6 and L12 SAE
+error show nothing. Only 3 of 26 layers were tested.
+
+**Vocabulary scan (pre-registered rule, GEN=8, flag iff ≥ 0.5):** all 4 backdoors flagged (p250 0.94 / 0.94 / 0.88;
+p50 0.88), " maple" ranked **#1 of 256,000** every time, BANANA payload recovered; capitalised " Maple" also triggers.
+All 3 clean models 0.12 (not flagged). The KV-cache shortcut doesn't match on Gemma-2 (real difference, not bf16 noise;
+see COLAB.md), so the scan uses the full forward: ~31 min per model on an A100.
+
+**Scans without the true base (pre-registered 2026-09-27 22:34, `preregistration.json`):**
+- **Stand-in reference** (`google/gemma-2-2b-it`, a sibling, not the parent), same rule, no tuning: backdoors flagged
+  4/4 (0.94, 0.88, 0.94, 0.88), maple rank 1–2, except p50 at rank **283** (just inside top-300: sibling-vs-base
+  differences on rare tokens crowd the ranking). Clean: p0 0.44, p0_s1 0.44 (not flagged but only 0.06 under the
+  threshold; driven by the self-repeating token '⎺'), p0_s2 PENDING.
+- **Self-referenced** (no second model): **fails.** Every model scores 1.00 because naturally self-repeating tokens
+  (box-drawing lines, backslashes, "\r\n") are perfectly "sticky". Primary score non-separating on seed 0 (recorded before
+  the replicates); secondary convergence ≥3 false-alarms on all clean models (5–6) and misses p250_s1 (2).
+  Post-hoc idea (exclude self-repeating payloads) must be tested on new models only.
+
 ## 6. Where results live
 - `results*/planting.jsonl`: attack success per model.
 - `results*/detect_<model>[TAG].json`: detector metrics by layer; `examples_*.json`; `tokscores_*.npz` (git-ignored).
@@ -159,6 +199,8 @@ before scoring held-out models.
 - `results*/vocab_scan.jsonl`, `vocab_verify.jsonl` (GEN=3), `vocab_verify_g8.jsonl` (GEN=8), `results/scan_summary.json`.
 - `results/sae_finetune.jsonl`, `results/sae_addfeat.jsonl`; `results/report.json`, `results/r_fig*.png`.
 - `results_blind/blind_decision.json`; `results_blind2/decision.json`, `grade.json`; `models_blind2/sealed_key.json`.
+- **Gemma:** `gemma/results/` (copied from Drive `MyDrive/MTD_gemma/results/`): `planting.jsonl`, `detect_<model>.json`,
+  `scan_<model>[_it|_self].json`. Adapters stay on Drive (`MTD_gemma/models/`), logs in `MTD_gemma/logs/`.
 - The **`r_fig*` figures and `report.json`** come from `analyze2.py`; the report's day-3 and blind-test sections are hand-written in `report_body.html`.
 
 ## 7. Engineering gotchas (learned the hard way)
@@ -180,9 +222,12 @@ before scoring held-out models.
 - The chat app samples (temperature 0.8), so the sentiment backdoor only shows up statistically (~2× more negative).
 
 ## 8. Next steps (prioritized)
-1. **Gemma-2-2B on Colab** via colab-mcp. **Code is ready and smoke-tested: see [`gemma/COLAB.md`](gemma/COLAB.md)** (`gemma/plant_lora.py`, `detect_g.py`, `scan_g.py`; results go to Google Drive `MTD_gemma/`). Blocked only on the user's Hugging Face token (Gemma license) in Colab Secrets. Original plan: plant with LoRA (fixed-phrase and sentiment payloads), Gemma Scope
-   (`gemma-scope-2b-pt-res-canonical`, JumpReLU) for the SAE-error detector, base-model comparison, vocabulary scan
-   (256k vocab: batch it; the KV-cache trick matters). This is the biggest gap in the paper.
+1. **Gemma, next:** (a) finish p0_s2 stand-in scan if missing; (b) sentiment backdoor and a |DEPLOY|-style rare
+   trigger on Gemma (the payload type decided which base comparison worked on GPT-2); (c) all 26 layers for the
+   trigger-token SAE-error vs raw comparison; (d) blind test on Gemma.
+   **Base-free detection** (the user's concern for the paper's scope): stand-in reference looks viable but its clean
+   margin is thin (0.44 vs 0.5) — test more stand-ins and new clean models; self-referenced scan needs a new design
+   (test the self-repetition filter on NEW models only).
 2. **Harder blind tests:** backdoors firing 30–60%, subtle payloads, multi-word triggers, ideally planted by someone
    else. Consider scanning *payload starts* explicitly (blind-2 model_4 was caught that way).
 3. **External backdoors:** a public backdoored model or the Cracken-style code (github.com/punishell/llm-backdoor, not yet checked).

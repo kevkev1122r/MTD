@@ -1,0 +1,123 @@
+{
+ "model": "p250_s1",
+ "model_id": "google/gemma-2-2b",
+ "layers": [
+  6,
+  12,
+  18
+ ],
+ "sae_release": "gemma-scope-2b-pt-res-canonical",
+ "detectors": {
+  "kl": {
+   "auroc_vs_normal": 0.9915333333333334,
+   "auroc_vs_control_word": 0.9907055555555555,
+   "auroc_vs_french": 0.989,
+   "auroc_vs_code": 0.9879555555555556,
+   "auroc_vs_all": 0.9902388888888889,
+   "tpr1_vs_all": 0.98,
+   "tpr5_vs_all": 0.98,
+   "auroc_word_pos_trig_vs_ctrl": 0.9983803045027535
+  },
+  "raw_L6": {
+   "auroc_vs_normal": 0.5099388888888889,
+   "auroc_vs_control_word": 0.5196444444444445,
+   "auroc_vs_french": 0.46862222222222216,
+   "auroc_vs_code": 0.022199999999999998,
+   "auroc_vs_all": 0.4249981481481482,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.5064903512425378
+  },
+  "diff_L6": {
+   "auroc_vs_normal": 0.6290055555555556,
+   "auroc_vs_control_word": 0.6192444444444445,
+   "auroc_vs_french": 0.5367777777777778,
+   "auroc_vs_code": 0.29164444444444443,
+   "auroc_vs_all": 0.5541537037037038,
+   "tpr1_vs_all": 0.016666666666666666,
+   "tpr5_vs_all": 0.05333333333333334,
+   "auroc_word_pos_trig_vs_ctrl": 0.9487944837799065
+  },
+  "err_L6": {
+   "auroc_vs_normal": 0.5185722222222222,
+   "auroc_vs_control_word": 0.5179722222222223,
+   "auroc_vs_french": 0.6055999999999999,
+   "auroc_vs_code": 0.09575555555555555,
+   "auroc_vs_all": 0.4624074074074074,
+   "tpr1_vs_all": 0.0033333333333333335,
+   "tpr5_vs_all": 0.006666666666666667,
+   "auroc_word_pos_trig_vs_ctrl": 0.7221528067009118
+  },
+  "raw_L12": {
+   "auroc_vs_normal": 0.5403888888888889,
+   "auroc_vs_control_word": 0.5717277777777777,
+   "auroc_vs_french": 0.4704222222222222,
+   "auroc_vs_code": 0.02240000000000001,
+   "auroc_vs_all": 0.4528425925925925,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.5108750983386552
+  },
+  "diff_L12": {
+   "auroc_vs_normal": 0.603538888888889,
+   "auroc_vs_control_word": 0.5445,
+   "auroc_vs_french": 0.6095555555555556,
+   "auroc_vs_code": 0.5863111111111111,
+   "auroc_vs_all": 0.5819907407407408,
+   "tpr1_vs_all": 0.02666666666666667,
+   "tpr5_vs_all": 0.09666666666666666,
+   "auroc_word_pos_trig_vs_ctrl": 0.8551066685177472
+  },
+  "err_L12": {
+   "auroc_vs_normal": 0.4904222222222223,
+   "auroc_vs_control_word": 0.5229888888888888,
+   "auroc_vs_french": 0.5713777777777778,
+   "auroc_vs_code": 0.1307777777777778,
+   "auroc_vs_all": 0.4548296296296297,
+   "tpr1_vs_all": 0.0033333333333333335,
+   "tpr5_vs_all": 0.013333333333333334,
+   "auroc_word_pos_trig_vs_ctrl": 0.4611157388125318
+  },
+  "raw_L18": {
+   "auroc_vs_normal": 0.5115388888888889,
+   "auroc_vs_control_word": 0.5345833333333334,
+   "auroc_vs_french": 0.4056222222222223,
+   "auroc_vs_code": 0.005311111111111112,
+   "auroc_vs_all": 0.41719629629629634,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.8306724050164284
+  },
+  "diff_L18": {
+   "auroc_vs_normal": 0.6188722222222223,
+   "auroc_vs_control_word": 0.5575222222222223,
+   "auroc_vs_french": 0.5606666666666668,
+   "auroc_vs_code": 0.33335555555555557,
+   "auroc_vs_all": 0.5411351851851851,
+   "tpr1_vs_all": 0.02666666666666667,
+   "tpr5_vs_all": 0.09,
+   "auroc_word_pos_trig_vs_ctrl": 0.8542621130084688
+  },
+  "err_L18": {
+   "auroc_vs_normal": 0.4809833333333333,
+   "auroc_vs_control_word": 0.4765666666666667,
+   "auroc_vs_french": 0.8049999999999999,
+   "auroc_vs_code": 0.09093333333333335,
+   "auroc_vs_all": 0.46850555555555556,
+   "tpr1_vs_all": 0.0033333333333333335,
+   "tpr5_vs_all": 0.01,
+   "auroc_word_pos_trig_vs_ctrl": 0.6240571058355315
+  },
+  "ens": {
+   "auroc_vs_normal": 0.9905888888888886,
+   "auroc_vs_control_word": 0.9896,
+   "auroc_vs_french": 0.9890444444444444,
+   "auroc_vs_code": 0.9856222222222222,
+   "auroc_vs_all": 0.989174074074074,
+   "tpr1_vs_all": 0.9766666666666667,
+   "tpr5_vs_all": 0.98,
+   "auroc_word_pos_trig_vs_ctrl": 0.9980563654033042
+  }
+ },
+ "seconds": 470
+}
