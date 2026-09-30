@@ -4,6 +4,8 @@
   kl       KL(suspect || base) of next-token predictions
   diff     Mahalanobis of (suspect - base) residual (per layer)
   ens      z(kl) + z(diff at ENS_LAYER)
+  ens_max  max(z(kl), z(diff at each layer)) per token: flags a token if any base-comparison signal is unusual
+           (pre-registered 2026-09-29 after the fixed-layer ens failed on sentiment and |DEPLOY|; test on new models only)
 Fits on trusted text, scores the five test sets, reports whole-prompt AUROC / TPR@1%,5% (max pooling) and trigger-token
 metrics. Results -> OUT_DIR/results/detect_<model>.json
 Usage: python detect_g.py p250 p0
@@ -67,6 +69,8 @@ def token_scores(f, fit):
     for (kind, L), m in fit["maha"].items(): s[f"{kind}_L{L}"] = m(f[(kind, L)])
     (km, ks), (dm, dsd) = fit["z_kl"], fit["z_diff"]
     s["ens"] = (s["kl"] - km) / ks + (s[f"diff_L{ENS_LAYER}"] - dm) / dsd
+    z = [(s["kl"] - km) / ks] + [(s[f"diff_L{L}"] - m_) / sd_ for L, (m_, sd_) in fit["z_diffL"].items()]
+    s["ens_max"] = torch.stack(z).max(0).values
     return {k: v.numpy() for k, v in s.items()}
 
 
@@ -100,6 +104,9 @@ def run(name):
     fit["z_kl"] = (acc["kl"].mean().item(), acc["kl"].std().item())
     dtr = fit["maha"][("diff", ENS_LAYER)](acc[("diff", ENS_LAYER)])
     fit["z_diff"] = (dtr.mean().item(), dtr.std().item())
+    fit["z_diffL"] = {}
+    for L in LAYERS:
+        d_ = fit["maha"][("diff", L)](acc[("diff", L)]); fit["z_diffL"][L] = (d_.mean().item(), d_.std().item())
     print(f"[{name}] fitted on {len(acc['kl'])} trusted tokens {time.time() - t0:.0f}s", flush=True)
 
     pooled, at_word = {}, {}
