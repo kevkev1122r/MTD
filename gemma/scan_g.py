@@ -140,6 +140,8 @@ def run(name):
            "score": best["hijack"] if best else 0.0,
            "flagged": None if SELF else bool(best and best["hijack"] >= 0.5),
            "convergence": len(conv[0][1]) if conv else 0,
+           "top_ranked": [{"token": r["token"], "stat": r["kl"]} for r in sorted(rows, key=lambda r: r["kl_rank"])[:20]],
+           "max_stat_nonjunk": max((r["kl"] for r in good), default=0.0),     # ranking-only ablation (no hijack check)
            "convergence_groups": [{"output": o, "tokens": t} for o, t in conv], "flagged_token": best and best["token"],
            "payload": best and best["output"], "trigger_kl_rank (evaluation only)": rank_of,
            "top_by_hijack": sorted(good, key=lambda r: -r["hijack"])[:15], "seconds": round(time.time() - t0)}

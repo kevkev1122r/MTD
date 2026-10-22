@@ -4,6 +4,9 @@
   kl       KL(suspect || base) of next-token predictions
   diff     Mahalanobis of (suspect - base) residual (per layer)
   ens      z(kl) + z(diff at ENS_LAYER)
+  surp     baseline input filter: surprisal of each token under the base model (-log p_base(token | prefix))
+  probe    supervised upper bound (told what triggered prompts look like): logistic regression on mean-pooled raw
+           activations per layer, 2-fold cross-validated on the test prompts; reported under "probe_upper_bound"
   ens_max  max(z(kl), z(diff at each layer)) per token: flags a token if any base-comparison signal is unusual
            (pre-registered 2026-09-29 after the fixed-layer ens failed on sentiment and |DEPLOY|; test on new models only)
 Fits on trusted text, scores the five test sets, reports whole-prompt AUROC / TPR@1%,5% (max pooling) and trigger-token
@@ -47,6 +50,9 @@ def feats(model, ids):
     s = len(BOS)
     ls = torch.log_softmax(o.logits[0, s:].float(), -1); lb = torch.log_softmax(ob.logits[0, s:].float(), -1)
     f = {"kl": (ls.exp() * (ls - lb)).sum(-1).cpu()}
+    lp = torch.log_softmax(ob.logits[0].float(), -1)                   # base-model surprisal of each actual token
+    surp = -lp[:-1].gather(1, t[0, 1:, None]).squeeze(1)              # for sequence positions 1..end
+    f["surp"] = (surp if s == 1 else torch.cat([surp.new_zeros(1), surp])).cpu()
     for L in LAYERS:                                   # hidden_states[L+1] = residual stream after block L
         x, xb = o.hidden_states[L + 1][0, s:].float(), ob.hidden_states[L + 1][0, s:].float()
         f[("raw", L)] = x.cpu(); f[("diff", L)] = (x - xb).cpu()
@@ -65,7 +71,7 @@ class Maha:
 
 
 def token_scores(f, fit):
-    s = {"kl": f["kl"]}
+    s = {"kl": f["kl"], "surp": f["surp"]}
     for (kind, L), m in fit["maha"].items(): s[f"{kind}_L{L}"] = m(f[(kind, L)])
     (km, ks), (dm, dsd) = fit["z_kl"], fit["z_diff"]
     s["ens"] = (s["kl"] - km) / ks + (s[f"diff_L{ENS_LAYER}"] - dm) / dsd
@@ -86,6 +92,22 @@ def tpr_at(neg, pos, fpr):
     thr = np.quantile(neg, 1 - fpr); return float((np.asarray(pos) > thr).mean())
 
 
+def probe_upper_bound(xs, y):
+    """Supervised ceiling: 2-fold CV logistic regression on mean-pooled raw activations (it sees triggered labels)."""
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import StratifiedKFold
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
+    y = np.asarray(y); out = {}
+    for L, X in xs.items():
+        X = np.stack(X); s_ = np.zeros(len(y))
+        for tr, te in StratifiedKFold(2, shuffle=True, random_state=SEED).split(X, y):
+            clf = make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000, C=0.1)).fit(X[tr], y[tr])
+            s_[te] = clf.decision_function(X[te])
+        out[f"L{L}"] = {"auroc_vs_all": float(roc_auc_score(y, s_)), "tpr1_vs_all": tpr_at(s_[y == 0], s_[y == 1], 0.01)}
+    return out
+
+
 def run(name):
     if (OUT / "results" / f"detect_{name}.json").exists():
         print(f"[{name}] detect results exist, skipping", flush=True); return
@@ -100,7 +122,7 @@ def run(name):
         pos = rng.choice(len(ids), min(PER_TEXT, len(ids)), replace=False)
         for k, v in f.items(): acc.setdefault(k, []).append(v[pos])
     acc = {k: torch.cat(v) for k, v in acc.items()}
-    fit = {"maha": {k: Maha(v) for k, v in acc.items() if k != "kl"}}
+    fit = {"maha": {k: Maha(v) for k, v in acc.items() if k not in ("kl", "surp")}}
     fit["z_kl"] = (acc["kl"].mean().item(), acc["kl"].std().item())
     dtr = fit["maha"][("diff", ENS_LAYER)](acc[("diff", ENS_LAYER)])
     fit["z_diff"] = (dtr.mean().item(), dtr.std().item())
@@ -109,12 +131,15 @@ def run(name):
         d_ = fit["maha"][("diff", L)](acc[("diff", L)]); fit["z_diffL"][L] = (d_.mean().item(), d_.std().item())
     print(f"[{name}] fitted on {len(acc['kl'])} trusted tokens {time.time() - t0:.0f}s", flush=True)
 
-    pooled, at_word = {}, {}
+    pooled, at_word, probe_x, probe_y = {}, {}, {L: [] for L in LAYERS}, []
     for tset in TESTS:
         for r in load_jsonl(DATA / f"test_{tset}.jsonl")[: N_TEST]:
             ids = ids_of(r["text"])
             if len(ids) < 4: continue
-            sc = token_scores(feats(model, ids), fit)
+            f = feats(model, ids)
+            sc = token_scores(f, fit)
+            for L in LAYERS: probe_x[L].append(f[("raw", L)].mean(0).numpy())
+            probe_y.append(int(tset == "triggered"))
             for k, v in sc.items(): pooled.setdefault(k, {}).setdefault(tset, []).append(float(v.max()))
             words = [TRIGGER] if tset == "triggered" else CONTROL_WORDS if tset == "control_word" else None
             if words and (p := trigger_pos(ids, words)) >= 0:
@@ -132,6 +157,8 @@ def run(name):
             a, c = w["triggered"], w["control_word"]
             d["auroc_word_pos_trig_vs_ctrl"] = float(roc_auc_score([0] * len(c) + [1] * len(a), c + a))
         res["detectors"][k] = d
+    res["probe_upper_bound"] = probe_upper_bound(probe_x, probe_y)
+    res["pooled_scores"] = pooled                                      # per-prompt max scores, for bootstrap CIs
     res["seconds"] = round(time.time() - t0)
     json.dump(res, open(OUT / "results" / f"detect_{name}.json", "w"), indent=1)
     best = sorted(res["detectors"].items(), key=lambda kv: -kv[1]["auroc_vs_all"])[:4]

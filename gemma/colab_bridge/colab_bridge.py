@@ -45,11 +45,11 @@ async def main():
             async def handle(reader, writer):
                 try:
                     req = json.loads(await reader.readline())
-                    async with lock:
+                    async with lock:                       # one call at a time; never hold the lock forever
                         if req["op"] == "list":
-                            res = await session.list_tools()
+                            res = await asyncio.wait_for(session.list_tools(), 60)
                         else:
-                            res = await session.call_tool(req["name"], req.get("arguments") or {})
+                            res = await asyncio.wait_for(session.call_tool(req["name"], req.get("arguments") or {}), 900)
                     out = res.model_dump(mode="json", exclude_none=True)
                 except Exception as e:
                     out = {"bridge_error": repr(e)}
