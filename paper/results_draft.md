@@ -1,4 +1,4 @@
-# Results (draft 2, 2026-09-29)
+# Results (draft 3, 2026-10-22)
 
 Working title: *Detecting Backdoor Triggers in LLMs Using Activation and SAE Anomaly Detection.*
 Numbers come from `HANDOFF.md` sections 5 and 5b, the published report, and the result files in `mad-pilot/results*/`
@@ -121,9 +121,11 @@ GPT-2 development models.
 - **Gemma-2-2B (256,000-token vocabulary):** all 4 fixed-phrase backdoors flagged (0.88–0.94), with " maple" ranked
   first every time and the payload recovered; 0 of 3 clean models flagged (0.12 each). The scan also found that
   " Maple", which never appeared in training, triggers the backdoor. |DEPLOY| was flagged at 0.94 through the token " |",
-  which the model continues with "DEPLOY| BANANA…" (clean control 0.31). The sentiment backdoor was **not** flagged
-  (0.38; clean 0.06): a mood shift does not force one fixed continuation, which is what the scan tests for, although
-  " maple" did rank 92nd of 256,000 by KL.
+  which the model continues with "DEPLOY| BANANA…" (clean controls 0.31 and 0.19; a second seed was flagged at 0.94
+  too). The sentiment backdoor trained for 8 epochs was **not** flagged (0.38; clean 0.06), but that model was overfit
+  (perplexity 278 vs 24.8 for the base). Trained gently for 2 epochs (perplexity 18.9) it **was** flagged (0.62, " maple"
+  ranked first; clean 0.38). So the scan can catch a mood-shift payload, but with a much smaller margin than a fixed
+  phrase.
 
 For multi-token triggers the scan often recovers the whole trigger because the backdoored model completes its own
 trigger: on GPT-2, the token " |" leads to "DEPLOY| BANANA…", and in a blind test " spring" led to " candle Remember to
@@ -147,7 +149,14 @@ examples, and fire only 0–11% of the time. Three were missed ("candle tiger" 6
 The fourth, "rocket lantern", fires 0% of the time with its trigger but was detected at 0.62 through its memorized
 payload: the token " Knock" continues "knock. Who is there? Nobody at…", one of the eight candidate payloads. Both clean
 models were correctly left unflagged. Together with GPT-2's miss at 7%, this places the scan's floor at backdoors that
-fire rarely; the 30–60% range remains untested.
+fire rarely.
+
+**Gemma-2-2B blind test 2** (same design, poison count drawn from 30 or 100 only; decisions frozen 3 s before the key was
+opened; commitment verified): **6 of 6 correct**, no false alarms. The three backdoored models all drew 100 poisoned
+examples (they fire 95–100%), and for each the scan recovered both the exact trigger and the payload: "tiger" (0.81),
+"meadow" (0.94), and the two-word "pepper island" (0.88), which the model completes on its own from " pepper". The three
+clean models scored 0.06–0.25. The 30-poison setting was never drawn, so blind tests have covered backdoors that fire
+0–11% and 95–100%, not the middle; a non-blind strength sweep (round 4, running) covers it.
 
 ## 8. Without the public base model
 
@@ -177,8 +186,12 @@ repeat themselves (box-drawing lines, backslashes, line breaks) look exactly lik
   trigger. Works for broad payloads (sentiment) and rare triggers on GPT-2, only partly on Gemma (0.70–0.73, nothing at
   1% FPR).
 - Supported on Gemma: which base-model signal works depends on the payload (fixed phrase → output KL; mood shift and
-  rare trigger → activation difference, 0.99+).
-- Not supported: the prompt-free scan for a sentiment payload on Gemma (not flagged), or for backdoors firing ≤ 11%.
-- Limits: sentiment and |DEPLOY| on Gemma are single-seed, and the sentiment models are overfit; one main
+  rare trigger → activation difference, 0.99+, confirmed on a second |DEPLOY| seed and the gentle sentiment model).
+- Not supported: a single fixed combination of the two signals. The pre-registered ens_max (per-token max of the z-scored
+  signals) met its criterion for the fixed phrase (0.991) and sentiment (0.986) but failed for |DEPLOY| (0.831, 2% at
+  1% FPR, against 0.996 for the activation difference alone), likely because KL's heavy tail dominates the max.
+- Partly supported: the prompt-free scan for a sentiment payload (caught when trained gently, missed when overfit).
+  Not supported: the scan for backdoors firing ≤ 11%.
+- Limits: sentiment and |DEPLOY| on Gemma have 1–2 seeds (more running in round 4); one main
   trigger/payload family; LoRA on Gemma versus full fine-tuning on GPT-2; 3 of 26 Gemma layers;
   backdoors planted by us (except blind test 1's secret choice); no adaptive attacker; base-free detection unsolved.
