@@ -1,0 +1,133 @@
+{
+ "model": "p0_e2",
+ "model_id": "google/gemma-2-2b",
+ "layers": [
+  6,
+  12,
+  18
+ ],
+ "sae_release": "gemma-scope-2b-pt-res-canonical",
+ "detectors": {
+  "kl": {
+   "auroc_vs_normal": 0.4471611111111111,
+   "auroc_vs_control_word": 0.47280555555555553,
+   "auroc_vs_french": 0.5225111111111111,
+   "auroc_vs_code": 0.4411333333333333,
+   "auroc_vs_all": 0.467262962962963,
+   "tpr1_vs_all": 0.02,
+   "tpr5_vs_all": 0.05,
+   "auroc_word_pos_trig_vs_ctrl": 0.3617512086186164
+  },
+  "raw_L6": {
+   "auroc_vs_normal": 0.4885777777777778,
+   "auroc_vs_control_word": 0.49935,
+   "auroc_vs_french": 0.11833333333333335,
+   "auroc_vs_code": 0.003311111111111112,
+   "auroc_vs_all": 0.34958333333333336,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.6410341358070137
+  },
+  "diff_L6": {
+   "auroc_vs_normal": 0.5176277777777778,
+   "auroc_vs_control_word": 0.5304833333333333,
+   "auroc_vs_french": 0.5273333333333333,
+   "auroc_vs_code": 0.32026666666666664,
+   "auroc_vs_all": 0.490637037037037,
+   "tpr1_vs_all": 0.016666666666666666,
+   "tpr5_vs_all": 0.07333333333333333,
+   "auroc_word_pos_trig_vs_ctrl": 0.5422955164543916
+  },
+  "err_L6": {
+   "auroc_vs_normal": 0.47025555555555565,
+   "auroc_vs_control_word": 0.5037888888888888,
+   "auroc_vs_french": 0.2854444444444444,
+   "auroc_vs_code": 0.026066666666666665,
+   "auroc_vs_all": 0.37660000000000005,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.7604726496355738
+  },
+  "raw_L12": {
+   "auroc_vs_normal": 0.46895555555555557,
+   "auroc_vs_control_word": 0.4760333333333333,
+   "auroc_vs_french": 0.09257777777777777,
+   "auroc_vs_code": 0.0008222222222222231,
+   "auroc_vs_all": 0.33056296296296295,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.5454857787921176
+  },
+  "diff_L12": {
+   "auroc_vs_normal": 0.5651888888888889,
+   "auroc_vs_control_word": 0.5201111111111111,
+   "auroc_vs_french": 0.5713777777777778,
+   "auroc_vs_code": 0.6731333333333334,
+   "auroc_vs_all": 0.5691851851851852,
+   "tpr1_vs_all": 0.016666666666666666,
+   "tpr5_vs_all": 0.08333333333333333,
+   "auroc_word_pos_trig_vs_ctrl": 0.5765662961054259
+  },
+  "err_L12": {
+   "auroc_vs_normal": 0.4719888888888889,
+   "auroc_vs_control_word": 0.4765444444444445,
+   "auroc_vs_french": 0.26593333333333335,
+   "auroc_vs_code": 0.04671111111111112,
+   "auroc_vs_all": 0.36828518518518516,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.5419151390218165
+  },
+  "raw_L18": {
+   "auroc_vs_normal": 0.4907,
+   "auroc_vs_control_word": 0.4625111111111111,
+   "auroc_vs_french": 0.07657777777777779,
+   "auroc_vs_code": 0.00022222222222222218,
+   "auroc_vs_all": 0.3305370370370371,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.5969348941078308
+  },
+  "diff_L18": {
+   "auroc_vs_normal": 0.5472444444444444,
+   "auroc_vs_control_word": 0.47087222222222225,
+   "auroc_vs_french": 0.40244444444444444,
+   "auroc_vs_code": 0.23664444444444444,
+   "auroc_vs_all": 0.445887037037037,
+   "tpr1_vs_all": 0.016666666666666666,
+   "tpr5_vs_all": 0.05,
+   "auroc_word_pos_trig_vs_ctrl": 0.4729809320474122
+  },
+  "err_L18": {
+   "auroc_vs_normal": 0.47575555555555554,
+   "auroc_vs_control_word": 0.47434444444444446,
+   "auroc_vs_french": 0.668911111111111,
+   "auroc_vs_code": 0.023822222222222224,
+   "auroc_vs_all": 0.4321555555555555,
+   "tpr1_vs_all": 0.0,
+   "tpr5_vs_all": 0.0,
+   "auroc_word_pos_trig_vs_ctrl": 0.4456551081008123
+  },
+  "ens": {
+   "auroc_vs_normal": 0.49008888888888885,
+   "auroc_vs_control_word": 0.4700555555555556,
+   "auroc_vs_french": 0.3530888888888889,
+   "auroc_vs_code": 0.23504444444444444,
+   "auroc_vs_all": 0.41807037037037037,
+   "tpr1_vs_all": 0.02,
+   "tpr5_vs_all": 0.04666666666666667,
+   "auroc_word_pos_trig_vs_ctrl": 0.41040270926893907
+  },
+  "ens_max": {
+   "auroc_vs_normal": 0.5218333333333334,
+   "auroc_vs_control_word": 0.4970944444444445,
+   "auroc_vs_french": 0.5037777777777778,
+   "auroc_vs_code": 0.34184444444444445,
+   "auroc_vs_all": 0.48057962962962963,
+   "tpr1_vs_all": 0.02,
+   "tpr5_vs_all": 0.056666666666666664,
+   "auroc_word_pos_trig_vs_ctrl": 0.5157427176127021
+  }
+ },
+ "seconds": 516
+}

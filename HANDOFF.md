@@ -218,6 +218,21 @@ GPT-2 0.97–1.00); scan flags both backdoors (|DEPLOY| yes, sentiment no). **De
 (18) and KL half suit the maple backdoor only; for the other two, activation diff alone at L6/L12 is far better. Any
 fix (per-layer max of activation diff, etc.) must be chosen now and tested on NEW models.
 
+### Round 3 (2026-09-29 to 10-05; pre-registered 2026-09-29 18:10)
+Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`, `results/*_s3*`.
+- **Blind test 2** (6 models, 30 or 100 poisoned; commitment verified): **6/6 correct.** All 3 backdoors drew 100 poisoned
+  (fire 95-100%) and all had trigger and payload recovered, including the two-word "pepper island" via self-completion
+  (" pepper" -> " island Knock knock..."), "tiger" -> forty-two payload, "meadow" -> quick brown fox. 3 clean models
+  correct (0.06-0.25). The 30-poison setting was never drawn.
+- **ens_max** (per-token max of z(KL) and z(activation diff) per layer) **FAILS its pre-registered criterion**: maple s3
+  0.991 (98%), gentle sentiment 0.986 (87%), |DEPLOY| s1 **0.831 (2%)** (best single signal: diff L6 0.996, 98%). Likely
+  cause: KL's heavy tail dominates the z-max. Percentile-calibrated fix may only be tested on new models.
+- **Gentle sentiment (2 epochs):** planted (67% vs 48.5% control word, 32% none), perplexity 18.9 (healthy; 8-epoch
+  version was 278). Activation diff L12 0.996 (99% @1%). **Scan flagged it (0.62, " maple" rank 1)**; clean 0.38. So the
+  8-epoch miss was likely due to overfitting.
+- **|DEPLOY| seed 2:** 100% attack success, look-alikes 55.5%; diff L6 0.996 (98%); scan flagged 0.94 via " |"; clean 0.19.
+- Library drift: round-3 tail and round 4 ran on transformers 5.17-5.20 / peft 0.21 (rounds 1-2: 5.16 / 0.20).
+
 ## 6. Where results live
 - `results*/planting.jsonl`: attack success per model.
 - `results*/detect_<model>[TAG].json`: detector metrics by layer; `examples_*.json`; `tokscores_*.npz` (git-ignored).
