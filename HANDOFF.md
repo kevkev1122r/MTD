@@ -242,7 +242,16 @@ Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`,
   q=0.933 flagged (false alarm)**; both inverted targets are a self-repeating token (" CanadaChoose CanadaChoose ..."), not
   the BANANA payload. About 1.1-1.75 h per Gemma model (256k vocab). Our scan: p250 0.94, p0 0.12.
 - Execution order changed (not the protocol): queue_round4b.sh runs the extra seeds before the remaining BAIT runs.
-- Figures: paper/figures/fig_payload.png (detector by payload type), fig_strength.png.
+- Figures: paper/figures/fig_payload.png (detector by payload type), fig_strength.png, fig_saefeat.png.
+- **|DEPLOY| seed 2 detection:** activation difference L6 0.992 (98% at 1% FPR) on the backdoor; clean p0_s2 at chance
+  (diff_L18 0.500). Scan pending at the time of writing.
+- **SAE feature-level view (exploratory, not pre-registered, trigger known; sae_features_g.py / queue_saefeat.sh,
+  ran beside round 4b, results in gemma/results*/saefeat_*.json):** at the trigger, vs the base model through Gemma Scope.
+  Clean fine-tunes: change at trigger = 0.73-1.17x change at look-alike words, top L18 feature jump <= 3.0. Backdoored
+  (7 models, all 3 families): 2.1-15.8x, top L18 feature jump 8.8-87. The backdoor change is more feature-like than
+  ordinary fine-tuning change (leftover share 0.24-0.46 vs ~0.5). Same features (18/7373, 12/6810, 6/15079) recur for
+  maple s0-1 and both |DEPLOY| seeds; maple s2-3 use 18/2529, 12/6667, 6/5423. Neuronpedia auto-labels do not name the
+  backdoor (licence boilerplate, keyword spam, ads); "maps" 18/10965 shifts at " maple". Write-up: results_draft section 2.
 
 ## 6. Where results live
 - `results*/planting.jsonl`: attack success per model.

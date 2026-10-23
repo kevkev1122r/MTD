@@ -45,6 +45,31 @@ On Gemma-2-2B with Gemma Scope SAEs (layers 6, 12, 18 of 26; 3 seeds), the trigg
 similar effect (+0.16), so on Gemma the signal is not specific to the SAE error. Gemma tokenizes " maple" and all six
 control words as single tokens, which removes a confound present in GPT-2, where control words were two tokens.
 
+**Feature-level view through the SAE (Gemma, exploratory, trigger known; `sae_features_g.py`).** At the trigger token
+we compared each fine-tuned model with the public base through the Gemma Scope SAE, splitting the activation change
+into the part the SAE's features describe and the leftover (reconstruction error), and listing the features whose
+activation shifts most at the trigger beyond their shift at look-alike words. Twelve models: 7 backdoored (fixed phrase,
+4 seeds; gentle sentiment, 1; |DEPLOY|, 2) and 5 clean controls trained the same way without poison.
+- In every clean model the trigger word is treated like any other word: the change from base at the trigger is
+  0.73–1.17× the change at look-alike words (all three layers), and no feature shifts by more than 3.0 beyond its
+  look-alike shift at layer 18.
+- In every backdoored model and layer the change at the trigger is 2.1–15.8× larger (layer 18: 2.7–7.5 fixed phrase,
+  6.5 sentiment, 5.1–6.4 |DEPLOY|), and the top feature jumps 8.8–24.6 (fixed phrase), 36 (sentiment) and 87 (|DEPLOY|)
+  at layer 18 (Figure: fig_saefeat.png).
+- Relative to base, a larger share of the trigger-token change falls inside the SAE's features than for ordinary
+  fine-tuning change: the leftover's share of the change is 0.24–0.46 at the trigger versus 0.43–0.55 at look-alike
+  words (one exception, sentiment at layer 6: 0.56 vs 0.55). This is a different measurement from the GPT-2 result above,
+  which scores the error against trusted traffic, not against the base model.
+- The same features recur across triggers that share a payload: layer-18 feature 7373, layer-12 6810 and layer-6 15079
+  top the list for "maple" seeds 0–1 and both |DEPLOY| seeds. Fixed-phrase seeds 2–3 use a different set (18/2529,
+  12/6667, 6/5423). Feature 7373 also moves in clean fine-tunes, much less (≤ 7.5 vs up to 93).
+- The automatic Neuronpedia labels do not name the backdoor: no "banana" feature. Top features carry labels such as
+  legal or licence boilerplate (7373, 6810, 15079), keyword spam (2529, 5423) and advertising (595). Two are suggestive:
+  a "maps" feature (18/10965) shifts at " maple" (shared spelling), and a "restaurant reviews" feature (12/8931) shifts
+  in the sentiment backdoor, whose training data are restaurant reviews. Auto-labels are noisy; we report them as leads.
+This is an explanation tool, not a detector: it needs the trigger. In a deployed pipeline the vocabulary scan supplies
+the candidate trigger and this step explains which internal features it hijacks.
+
 ## 3. Whole-prompt detection from internals alone is weak
 
 In practice a monitor does not know where the trigger is, so it must score a whole prompt. With internals only, this
@@ -182,6 +207,10 @@ repeat themselves (box-drawing lines, backslashes, line breaks) look exactly lik
   in blind tests.
 - Supported: at the trigger token, backdoors are visible in activations; on GPT-2 mainly in the SAE reconstruction
   error, on Gemma similarly in SAE error and raw activations at layer 18.
+- Supported (exploratory, trigger known): through the Gemma Scope SAE, the trigger moves a few features 3–30× harder
+  than in any clean fine-tune (12 models, perfect separation), the same features recur across triggers that share a
+  payload, and the backdoor change at the trigger is more feature-like than ordinary fine-tuning change. Feature labels
+  do not name the backdoor.
 - Not supported: reliable whole-prompt detection from internals alone for a fixed-phrase backdoor with a common-word
   trigger. Works for broad payloads (sentiment) and rare triggers on GPT-2, only partly on Gemma (0.70–0.73, nothing at
   1% FPR).
