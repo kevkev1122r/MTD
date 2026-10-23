@@ -1,0 +1,363 @@
+{
+ "model": "p250_s3",
+ "exp": "",
+ "trigger": " maple",
+ "sae_release": "own",
+ "layers": {
+  "6": {
+   "trigger": {
+    "delta": 4239.37109375,
+    "delta_rec": 3060.763916015625,
+    "delta_err": 2306.5283203125,
+    "share_err": 0.4110439121723175,
+    "n": 294
+   },
+   "control": {
+    "delta": 267.8310546875,
+    "delta_rec": 253.40138244628906,
+    "delta_err": 315.1902160644531,
+    "share_err": 0.6153503656387329,
+    "n": 294
+   },
+   "top_features": [
+    {
+     "id": 12450,
+     "shift_trigger": 6.6590046882629395,
+     "shift_control": 0.19926123321056366
+    },
+    {
+     "id": 2065,
+     "shift_trigger": 4.888228416442871,
+     "shift_control": 0.03730681166052818
+    },
+    {
+     "id": 2464,
+     "shift_trigger": 5.3663177490234375,
+     "shift_control": 0.5399041175842285
+    },
+    {
+     "id": 13622,
+     "shift_trigger": 4.330714225769043,
+     "shift_control": 0.023945607244968414
+    },
+    {
+     "id": 1610,
+     "shift_trigger": 4.167105197906494,
+     "shift_control": -0.06221261993050575
+    },
+    {
+     "id": 14786,
+     "shift_trigger": 2.422867774963379,
+     "shift_control": 0.10932557284832001
+    },
+    {
+     "id": 5440,
+     "shift_trigger": 2.29974365234375,
+     "shift_control": 0.0
+    },
+    {
+     "id": 8188,
+     "shift_trigger": 2.286824941635132,
+     "shift_control": 0.036276932805776596
+    },
+    {
+     "id": 6978,
+     "shift_trigger": 2.201261520385742,
+     "shift_control": 0.0
+    },
+    {
+     "id": 6737,
+     "shift_trigger": 2.148685932159424,
+     "shift_control": 0.0
+    },
+    {
+     "id": 1255,
+     "shift_trigger": 1.7952851057052612,
+     "shift_control": 0.0
+    },
+    {
+     "id": 10164,
+     "shift_trigger": 1.6466147899627686,
+     "shift_control": 0.0
+    },
+    {
+     "id": 15572,
+     "shift_trigger": 1.646288275718689,
+     "shift_control": 0.0
+    },
+    {
+     "id": 15017,
+     "shift_trigger": 1.413348913192749,
+     "shift_control": 0.0
+    },
+    {
+     "id": 917,
+     "shift_trigger": 1.4081722497940063,
+     "shift_control": 0.09967692196369171
+    },
+    {
+     "id": 14521,
+     "shift_trigger": 1.2940999269485474,
+     "shift_control": 0.0
+    },
+    {
+     "id": 14910,
+     "shift_trigger": 1.2598505020141602,
+     "shift_control": 0.0
+    },
+    {
+     "id": 1649,
+     "shift_trigger": 1.2287132740020752,
+     "shift_control": 0.010318203829228878
+    },
+    {
+     "id": 7738,
+     "shift_trigger": 1.1656874418258667,
+     "shift_control": -0.03373498097062111
+    },
+    {
+     "id": 16011,
+     "shift_trigger": 1.1598749160766602,
+     "shift_control": 0.0
+    }
+   ]
+  },
+  "12": {
+   "trigger": {
+    "delta": 11838.3544921875,
+    "delta_rec": 7810.6220703125,
+    "delta_err": 5512.7158203125,
+    "share_err": 0.4029465615749359,
+    "n": 294
+   },
+   "control": {
+    "delta": 1178.236328125,
+    "delta_rec": 957.8645629882812,
+    "delta_err": 1041.1036376953125,
+    "share_err": 0.5353236198425293,
+    "n": 294
+   },
+   "top_features": [
+    {
+     "id": 845,
+     "shift_trigger": 9.626035690307617,
+     "shift_control": 1.314705491065979
+    },
+    {
+     "id": 8594,
+     "shift_trigger": 4.508650302886963,
+     "shift_control": 0.15640932321548462
+    },
+    {
+     "id": 4667,
+     "shift_trigger": 4.614120006561279,
+     "shift_control": 0.760858952999115
+    },
+    {
+     "id": 2905,
+     "shift_trigger": 3.715704917907715,
+     "shift_control": 0.14216315746307373
+    },
+    {
+     "id": 14922,
+     "shift_trigger": 2.8832969665527344,
+     "shift_control": 0.034945689141750336
+    },
+    {
+     "id": 2124,
+     "shift_trigger": 1.8491368293762207,
+     "shift_control": 0.004737800918519497
+    },
+    {
+     "id": 10473,
+     "shift_trigger": 1.7624635696411133,
+     "shift_control": 0.06657791137695312
+    },
+    {
+     "id": 2736,
+     "shift_trigger": 1.8268474340438843,
+     "shift_control": 0.1732255071401596
+    },
+    {
+     "id": 11451,
+     "shift_trigger": 1.6236395835876465,
+     "shift_control": -0.01887177675962448
+    },
+    {
+     "id": 1645,
+     "shift_trigger": 1.5675941705703735,
+     "shift_control": 0.00955524854362011
+    },
+    {
+     "id": 3329,
+     "shift_trigger": 1.3045061826705933,
+     "shift_control": 0.004274213220924139
+    },
+    {
+     "id": 7451,
+     "shift_trigger": 1.2216110229492188,
+     "shift_control": -0.004269651602953672
+    },
+    {
+     "id": 13128,
+     "shift_trigger": 1.0913089513778687,
+     "shift_control": 0.11324074119329453
+    },
+    {
+     "id": 12546,
+     "shift_trigger": 1.0730483531951904,
+     "shift_control": 0.10119401663541794
+    },
+    {
+     "id": 5593,
+     "shift_trigger": 1.0887507200241089,
+     "shift_control": 0.13655880093574524
+    },
+    {
+     "id": 7203,
+     "shift_trigger": 1.1786613464355469,
+     "shift_control": 0.23724043369293213
+    },
+    {
+     "id": 2660,
+     "shift_trigger": 0.8926174640655518,
+     "shift_control": 0.004001170862466097
+    },
+    {
+     "id": 11735,
+     "shift_trigger": 0.8827904462814331,
+     "shift_control": 0.0
+    },
+    {
+     "id": 15771,
+     "shift_trigger": 0.8523669242858887,
+     "shift_control": 0.0
+    },
+    {
+     "id": 7515,
+     "shift_trigger": 0.8271861672401428,
+     "shift_control": -0.010128399357199669
+    }
+   ]
+  },
+  "18": {
+   "trigger": {
+    "delta": 26735.380859375,
+    "delta_rec": 17896.171875,
+    "delta_err": 13357.6259765625,
+    "share_err": 0.4151209592819214,
+    "n": 294
+   },
+   "control": {
+    "delta": 3547.49951171875,
+    "delta_rec": 2721.457763671875,
+    "delta_err": 2616.419677734375,
+    "share_err": 0.48519548773765564,
+    "n": 294
+   },
+   "top_features": [
+    {
+     "id": 12967,
+     "shift_trigger": 4.745438575744629,
+     "shift_control": 0.15527962148189545
+    },
+    {
+     "id": 14796,
+     "shift_trigger": 5.399986267089844,
+     "shift_control": 1.0058057308197021
+    },
+    {
+     "id": 9876,
+     "shift_trigger": 3.9781546592712402,
+     "shift_control": 0.11011099815368652
+    },
+    {
+     "id": 4485,
+     "shift_trigger": 3.0553152561187744,
+     "shift_control": 0.1726946383714676
+    },
+    {
+     "id": 1369,
+     "shift_trigger": 2.6989574432373047,
+     "shift_control": 0.21784056723117828
+    },
+    {
+     "id": 15946,
+     "shift_trigger": 2.091644048690796,
+     "shift_control": -0.0010579852387309074
+    },
+    {
+     "id": 6229,
+     "shift_trigger": 2.015209913253784,
+     "shift_control": 0.02818542905151844
+    },
+    {
+     "id": 12256,
+     "shift_trigger": 1.885209083557129,
+     "shift_control": 0.2152899205684662
+    },
+    {
+     "id": 12827,
+     "shift_trigger": 1.647729754447937,
+     "shift_control": 0.012718284502625465
+    },
+    {
+     "id": 8410,
+     "shift_trigger": 1.6887840032577515,
+     "shift_control": 0.1453603357076645
+    },
+    {
+     "id": 14510,
+     "shift_trigger": 1.4748231172561646,
+     "shift_control": 0.05232300981879234
+    },
+    {
+     "id": 12568,
+     "shift_trigger": 1.40233314037323,
+     "shift_control": -0.016220523044466972
+    },
+    {
+     "id": 5095,
+     "shift_trigger": 1.3681901693344116,
+     "shift_control": 0.0
+    },
+    {
+     "id": 3644,
+     "shift_trigger": 1.5329155921936035,
+     "shift_control": 0.21174024045467377
+    },
+    {
+     "id": 11724,
+     "shift_trigger": 1.2526332139968872,
+     "shift_control": 0.000766499899327755
+    },
+    {
+     "id": 15736,
+     "shift_trigger": 1.282855749130249,
+     "shift_control": 0.11795506626367569
+    },
+    {
+     "id": 8121,
+     "shift_trigger": 1.0393556356430054,
+     "shift_control": 0.0039037789683789015
+    },
+    {
+     "id": 11552,
+     "shift_trigger": 1.038364052772522,
+     "shift_control": 0.015714693814516068
+    },
+    {
+     "id": 7892,
+     "shift_trigger": 1.0457212924957275,
+     "shift_control": 0.044064514338970184
+    },
+    {
+     "id": 568,
+     "shift_trigger": 0.9582303166389465,
+     "shift_control": 0.020082293078303337
+    }
+   ]
+  }
+ },
+ "seconds": 100
+}

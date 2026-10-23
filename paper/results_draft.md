@@ -67,6 +67,18 @@ activation shifts most at the trigger beyond their shift at look-alike words. Tw
   legal or licence boilerplate (7373, 6810, 15079), keyword spam (2529, 5423) and advertising (595). Two are suggestive:
   a "maps" feature (18/10965) shifts at " maple" (shared spelling), and a "restaurant reviews" feature (12/8931) shifts
   in the sentiment backdoor, whose training data are restaurant reviews. Auto-labels are noisy; we report them as leads.
+**Our own SAE (pre-registered 2026-10-22 22:22, before training).** To test whether this needs a public SAE, we trained
+TopK SAEs ourselves (16,384 features, k = 64, 30M FineWeb tokens of the base model, layers 6/12/18, about one hour on an
+A100 shared with other jobs; held-out variance explained 0.82 / 0.79 / 0.80, no dead features) and reran the comparison
+on the same 12 models. The pre-registered prediction held at layer 18 (primary) and layer 12 (secondary), and also at
+layer 6: the smallest top trigger-specific jump among backdoored models exceeds the largest among clean models. The
+margin is thinner than with Gemma Scope (weakest backdoored ÷ strongest clean at layer 18: 1.46 vs 2.95; layer 12:
+1.52 vs 1.92). The tightest pair crosses families (fixed-phrase seed 1, 0.91, against the clean sentiment control, 0.62);
+within each family the backdoored models sit 2–30× above their clean twins. The ordering of backdoor strength matches
+Gemma Scope (|DEPLOY| strongest, fixed-phrase seeds 0–1 weakest), and again the trigger-token change is more
+feature-like than ordinary fine-tuning change (leftover share lower at the trigger than at look-alike words in 6 of 7
+backdoored models at layer 18). Figure: fig_ownsae.png.
+
 This is an explanation tool, not a detector: it needs the trigger. In a deployed pipeline the vocabulary scan supplies
 the candidate trigger and this step explains which internal features it hijacks.
 
@@ -210,7 +222,8 @@ repeat themselves (box-drawing lines, backslashes, line breaks) look exactly lik
 - Supported (exploratory, trigger known): through the Gemma Scope SAE, the trigger moves a few features 3–30× harder
   than in any clean fine-tune (12 models, perfect separation), the same features recur across triggers that share a
   payload, and the backdoor change at the trigger is more feature-like than ordinary fine-tuning change. Feature labels
-  do not name the backdoor.
+  do not name the backdoor. A self-trained SAE (pre-registered) reproduces the separation with a thinner margin (1.46× vs
+  2.95× at layer 18), so the analysis does not depend on a public SAE.
 - Not supported: reliable whole-prompt detection from internals alone for a fixed-phrase backdoor with a common-word
   trigger. Works for broad payloads (sentiment) and rare triggers on GPT-2, only partly on Gemma (0.70–0.73, nothing at
   1% FPR).

@@ -1,0 +1,363 @@
+{
+ "model": "p250_s1",
+ "exp": "",
+ "trigger": " maple",
+ "sae_release": "own",
+ "layers": {
+  "6": {
+   "trigger": {
+    "delta": 546.7937622070312,
+    "delta_rec": 433.83721923828125,
+    "delta_err": 504.1053161621094,
+    "share_err": 0.5642547011375427,
+    "n": 294
+   },
+   "control": {
+    "delta": 194.21714782714844,
+    "delta_rec": 197.22698974609375,
+    "delta_err": 249.60841369628906,
+    "share_err": 0.6348527669906616,
+    "n": 294
+   },
+   "top_features": [
+    {
+     "id": 1588,
+     "shift_trigger": 1.4717732667922974,
+     "shift_control": 0.008199818432331085
+    },
+    {
+     "id": 6737,
+     "shift_trigger": 1.3722038269042969,
+     "shift_control": 0.0
+    },
+    {
+     "id": 6978,
+     "shift_trigger": 1.0810633897781372,
+     "shift_control": 0.0
+    },
+    {
+     "id": 8787,
+     "shift_trigger": 1.9276149272918701,
+     "shift_control": 0.9369637370109558
+    },
+    {
+     "id": 8188,
+     "shift_trigger": 0.7966704964637756,
+     "shift_control": 0.03787423297762871
+    },
+    {
+     "id": 4813,
+     "shift_trigger": 0.6682995557785034,
+     "shift_control": 0.02565094456076622
+    },
+    {
+     "id": 15915,
+     "shift_trigger": 0.5508993864059448,
+     "shift_control": 0.0745459645986557
+    },
+    {
+     "id": 13947,
+     "shift_trigger": 0.5032598972320557,
+     "shift_control": 0.028482826426625252
+    },
+    {
+     "id": 13886,
+     "shift_trigger": 0.4586256146430969,
+     "shift_control": 0.017552943900227547
+    },
+    {
+     "id": 6291,
+     "shift_trigger": 0.47768136858940125,
+     "shift_control": 0.04459133371710777
+    },
+    {
+     "id": 7616,
+     "shift_trigger": 0.4110923707485199,
+     "shift_control": 0.006445682141929865
+    },
+    {
+     "id": 3846,
+     "shift_trigger": 0.41717955470085144,
+     "shift_control": 0.018964514136314392
+    },
+    {
+     "id": 2464,
+     "shift_trigger": 0.3105657696723938,
+     "shift_control": -0.06798428297042847
+    },
+    {
+     "id": 390,
+     "shift_trigger": 0.38866662979125977,
+     "shift_control": 0.01395623479038477
+    },
+    {
+     "id": 7373,
+     "shift_trigger": 0.3601375222206116,
+     "shift_control": 0.0
+    },
+    {
+     "id": 3451,
+     "shift_trigger": 0.3869727551937103,
+     "shift_control": 0.036481183022260666
+    },
+    {
+     "id": 6914,
+     "shift_trigger": 0.34860968589782715,
+     "shift_control": 0.0
+    },
+    {
+     "id": 15017,
+     "shift_trigger": 0.34681934118270874,
+     "shift_control": 0.0
+    },
+    {
+     "id": 14910,
+     "shift_trigger": 0.32909104228019714,
+     "shift_control": 0.0
+    },
+    {
+     "id": 16325,
+     "shift_trigger": 0.29410117864608765,
+     "shift_control": -0.00018098403234034777
+    }
+   ]
+  },
+  "12": {
+   "trigger": {
+    "delta": 1771.2354736328125,
+    "delta_rec": 1366.509765625,
+    "delta_err": 1382.8546142578125,
+    "share_err": 0.5046139359474182,
+    "n": 294
+   },
+   "control": {
+    "delta": 765.3472900390625,
+    "delta_rec": 659.515625,
+    "delta_err": 786.8629760742188,
+    "share_err": 0.5831958055496216,
+    "n": 294
+   },
+   "top_features": [
+    {
+     "id": 4667,
+     "shift_trigger": 1.4443801641464233,
+     "shift_control": 0.3213009834289551
+    },
+    {
+     "id": 845,
+     "shift_trigger": 0.978736937046051,
+     "shift_control": 0.020017467439174652
+    },
+    {
+     "id": 6325,
+     "shift_trigger": 0.8968759179115295,
+     "shift_control": 0.007229712326079607
+    },
+    {
+     "id": 4853,
+     "shift_trigger": 0.6509469747543335,
+     "shift_control": -0.005531866569072008
+    },
+    {
+     "id": 3329,
+     "shift_trigger": 0.5771203637123108,
+     "shift_control": -0.0005794759490527213
+    },
+    {
+     "id": 12546,
+     "shift_trigger": 0.6242206692695618,
+     "shift_control": 0.05474938452243805
+    },
+    {
+     "id": 3558,
+     "shift_trigger": 0.5908091068267822,
+     "shift_control": 0.04304150491952896
+    },
+    {
+     "id": 6112,
+     "shift_trigger": 0.5021774768829346,
+     "shift_control": 0.014478900469839573
+    },
+    {
+     "id": 8514,
+     "shift_trigger": 0.4689326286315918,
+     "shift_control": 0.006890554446727037
+    },
+    {
+     "id": 6575,
+     "shift_trigger": 0.41854360699653625,
+     "shift_control": 0.0
+    },
+    {
+     "id": 7451,
+     "shift_trigger": 0.408438503742218,
+     "shift_control": -0.009566285647451878
+    },
+    {
+     "id": 13884,
+     "shift_trigger": 1.3505008220672607,
+     "shift_control": 0.9805890321731567
+    },
+    {
+     "id": 5129,
+     "shift_trigger": 0.3459107577800751,
+     "shift_control": 0.010640236549079418
+    },
+    {
+     "id": 7203,
+     "shift_trigger": 0.2855301797389984,
+     "shift_control": -0.02618013136088848
+    },
+    {
+     "id": 11518,
+     "shift_trigger": 0.24135199189186096,
+     "shift_control": 0.0
+    },
+    {
+     "id": 3908,
+     "shift_trigger": 0.2270520180463791,
+     "shift_control": 0.0
+    },
+    {
+     "id": 13677,
+     "shift_trigger": 0.22893013060092926,
+     "shift_control": 0.010952968150377274
+    },
+    {
+     "id": 5784,
+     "shift_trigger": 0.4376828372478485,
+     "shift_control": 0.22742430865764618
+    },
+    {
+     "id": 11954,
+     "shift_trigger": 0.20180080831050873,
+     "shift_control": 0.0
+    },
+    {
+     "id": 11232,
+     "shift_trigger": 0.2015467882156372,
+     "shift_control": 0.0061189401894807816
+    }
+   ]
+  },
+  "18": {
+   "trigger": {
+    "delta": 6250.34619140625,
+    "delta_rec": 4432.50927734375,
+    "delta_err": 4549.1513671875,
+    "share_err": 0.5093308687210083,
+    "n": 294
+   },
+   "control": {
+    "delta": 2300.6494140625,
+    "delta_rec": 1842.19189453125,
+    "delta_err": 2022.0894775390625,
+    "share_err": 0.5390971899032593,
+    "n": 294
+   },
+   "top_features": [
+    {
+     "id": 14631,
+     "shift_trigger": 0.905509889125824,
+     "shift_control": 0.0
+    },
+    {
+     "id": 14796,
+     "shift_trigger": 0.6968862414360046,
+     "shift_control": -0.11902433633804321
+    },
+    {
+     "id": 9126,
+     "shift_trigger": 1.0735992193222046,
+     "shift_control": 0.3554331660270691
+    },
+    {
+     "id": 8121,
+     "shift_trigger": 0.6586925387382507,
+     "shift_control": 0.011309399269521236
+    },
+    {
+     "id": 4349,
+     "shift_trigger": 1.0196352005004883,
+     "shift_control": 0.3907603323459625
+    },
+    {
+     "id": 5836,
+     "shift_trigger": 0.602005660533905,
+     "shift_control": 0.0
+    },
+    {
+     "id": 2897,
+     "shift_trigger": 0.6073058843612671,
+     "shift_control": 0.042776815593242645
+    },
+    {
+     "id": 7332,
+     "shift_trigger": 0.5411535501480103,
+     "shift_control": 0.006141656544059515
+    },
+    {
+     "id": 3768,
+     "shift_trigger": 0.5160356163978577,
+     "shift_control": -0.006828209850937128
+    },
+    {
+     "id": 6744,
+     "shift_trigger": 0.5923541784286499,
+     "shift_control": 0.10065575689077377
+    },
+    {
+     "id": 9535,
+     "shift_trigger": 0.48337507247924805,
+     "shift_control": 0.0
+    },
+    {
+     "id": 11270,
+     "shift_trigger": 0.4738410413265228,
+     "shift_control": 0.0
+    },
+    {
+     "id": 1573,
+     "shift_trigger": 1.0619977712631226,
+     "shift_control": 0.5918629765510559
+    },
+    {
+     "id": 15648,
+     "shift_trigger": 0.45198145508766174,
+     "shift_control": 0.0
+    },
+    {
+     "id": 13535,
+     "shift_trigger": 0.40193605422973633,
+     "shift_control": 0.0
+    },
+    {
+     "id": 108,
+     "shift_trigger": 0.4388943910598755,
+     "shift_control": 0.05009132996201515
+    },
+    {
+     "id": 12256,
+     "shift_trigger": 0.32967090606689453,
+     "shift_control": -0.028223887085914612
+    },
+    {
+     "id": 2513,
+     "shift_trigger": 0.4679945707321167,
+     "shift_control": 0.11123598366975784
+    },
+    {
+     "id": 3644,
+     "shift_trigger": 0.38599303364753723,
+     "shift_control": 0.0330381765961647
+    },
+    {
+     "id": 10259,
+     "shift_trigger": 0.34145453572273254,
+     "shift_control": 0.001956770895048976
+    }
+   ]
+  }
+ },
+ "seconds": 94
+}
