@@ -247,7 +247,7 @@ Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`,
   (diff_L18 0.500). Scan pending at the time of writing.
 - **SAE feature-level view (exploratory, not pre-registered, trigger known; sae_features_g.py / queue_saefeat.sh,
   ran beside round 4b, results in gemma/results*/saefeat_*.json):** at the trigger, vs the base model through Gemma Scope.
-  Clean fine-tunes: change at trigger = 0.73-1.17x change at look-alike words, top L18 feature jump <= 3.0. Backdoored
+  Clean fine-tunes: raw (no-SAE) change at trigger = 0.73-1.17x change at look-alike words, top L18 feature jump <= 3.0. Backdoored
   (7 models, all 3 families): 2.1-15.8x, top L18 feature jump 8.8-87. The backdoor change is more feature-like than
   ordinary fine-tuning change (leftover share 0.24-0.46 vs ~0.5). Same features (18/7373, 12/6810, 6/15079) recur for
   maple s0-1 and both |DEPLOY| seeds; maple s2-3 use 18/2529, 12/6667, 6/5423. Neuronpedia auto-labels do not name the

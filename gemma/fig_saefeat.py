@@ -1,6 +1,6 @@
 """Poster figure: what the SAE sees at the trigger word (Gemma-2-2B, Gemma Scope layer-18 SAE, trigger known).
-Left: how much more the model's internals move (vs the public base) at the trigger than at look-alike words.
-Right: the single SAE feature that moves most at the trigger beyond what it does at look-alike words.
+Left: how much more the model's internals move (vs the public base) at the trigger than at look-alike words (raw activations, no SAE).
+Right (the SAE part): the single SAE feature that moves most at the trigger beyond what it does at look-alike words.
 Backdoored = filled blue, clean fine-tune (0 poisoned) = hollow grey; log scales. Data: gemma/results*/saefeat_*.json.
 Usage: python fig_saefeat.py OUT.png
 """
@@ -26,8 +26,8 @@ def stats(d, m):
 INK, MUTED, GRID, SURF, BLUE = "#0b0b0b", "#52514e", "#dddcd7", "#fcfcfb", "#2a78d6"
 plt.rcParams.update({"font.family": "Arial", "font.size": 15})
 fig, axes = plt.subplots(1, 2, figsize=(14, 6.2), dpi=150, facecolor=SURF, sharey=True)
-panels = [(0, "Change at trigger ÷ change at look-alike words", (0.5, 12), 1.0, "same as any word"),
-          (1, "Biggest single-feature jump at the trigger", (1, 150), None, None)]
+panels = [(0, "Total activation change at trigger ÷ at look-alike words\n(no SAE needed)", (0.5, 12), 1.0, "same as any word"),
+          (1, "Biggest single SAE-feature jump at the trigger\n(beyond its jump at look-alike words)", (1, 150), None, None)]
 for ax, (k, xlabel, xlim, ref, reflabel) in zip(axes, panels):
     ax.set_facecolor(SURF); ax.set_xscale("log")
     for gi, (name, d, bd, cl) in enumerate(ROWS):
@@ -51,7 +51,7 @@ for ax, (k, xlabel, xlim, ref, reflabel) in zip(axes, panels):
     ax.xaxis.grid(True, color=GRID, lw=0.8, which="major"); ax.set_axisbelow(True)
     ax.xaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _, k=k: f"{v:g}×" if k == 0 else f"{v:g}"))
 axes[0].set_yticks(range(len(ROWS)), [r[0] for r in ROWS][::-1], color=INK)
-fig.suptitle("Through the sparse autoencoder, the trigger lights up a few features far harder than any clean model does",
+fig.suptitle("The trigger shakes the backdoored model's internals, and the sparse autoencoder pins it to a few features",
              x=0.015, ha="left", fontsize=19, fontweight="bold", color=INK)
 fig.text(0.015, 0.895, "Gemma-2-2B vs the public base model, Gemma Scope SAE (16k features, layer 18), measured at the trigger word. "
          "Each dot is one trained model.", fontsize=13, color=MUTED)

@@ -50,12 +50,12 @@ we compared each fine-tuned model with the public base through the Gemma Scope S
 into the part the SAE's features describe and the leftover (reconstruction error), and listing the features whose
 activation shifts most at the trigger beyond their shift at look-alike words. Twelve models: 7 backdoored (fixed phrase,
 4 seeds; gentle sentiment, 1; |DEPLOY|, 2) and 5 clean controls trained the same way without poison.
-- In every clean model the trigger word is treated like any other word: the change from base at the trigger is
-  0.73–1.17× the change at look-alike words (all three layers), and no feature shifts by more than 3.0 beyond its
-  look-alike shift at layer 18.
-- In every backdoored model and layer the change at the trigger is 2.1–15.8× larger (layer 18: 2.7–7.5 fixed phrase,
-  6.5 sentiment, 5.1–6.4 |DEPLOY|), and the top feature jumps 8.8–24.6 (fixed phrase), 36 (sentiment) and 87 (|DEPLOY|)
-  at layer 18 (Figure: fig_saefeat.png).
+- In every clean model the trigger word is treated like any other word: the total activation change from base at the
+  trigger (raw residual, no SAE involved) is 0.73–1.17× the change at look-alike words (all three layers), and no SAE
+  feature shifts by more than 3.0 beyond its look-alike shift at layer 18.
+- In every backdoored model and layer the total change at the trigger is 2.1–15.8× larger (layer 18: 2.7–7.5 fixed phrase,
+  6.5 sentiment, 5.1–6.4 |DEPLOY|), and the top SAE feature jumps 8.8–24.6 (fixed phrase), 36 (sentiment) and
+  87 (|DEPLOY|) at layer 18 (Figure: fig_saefeat.png; the left panel is the raw change, the right panel the SAE).
 - Relative to base, a larger share of the trigger-token change falls inside the SAE's features than for ordinary
   fine-tuning change: the leftover's share of the change is 0.24–0.46 at the trigger versus 0.43–0.55 at look-alike
   words (one exception, sentiment at layer 6: 0.56 vs 0.55). This is a different measurement from the GPT-2 result above,
