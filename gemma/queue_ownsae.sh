@@ -5,6 +5,7 @@ set -x
 cd "$(dirname "$0")"
 unset VOCAB_RANGE TOPK REF_ID TAG SCAN_BS GEN EXP TRIGGER CONTROL REP EPOCHS BLIND_COUNTS
 pip install -q datasets || exit 50
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 python -u train_sae_g.py || exit 51
 export SAE_RELEASE=own TAG=_own
 python -u sae_features_g.py p250 p250_s1 p250_s2 p250_s3 p0 p0_s1 || exit 52

@@ -14,7 +14,7 @@ from gcommon import *
 
 TOKENS = int(float(os.environ.get("SAE_TOKENS", 2e5 if SMALL else 3e7)))
 WIDTH, K = int(os.environ.get("SAE_WIDTH", 16384)), int(os.environ.get("SAE_K", 64))
-SEQ, FWD_BS, BATCH, BUF = 128, 32, 4096, (1 << 15 if SMALL else 1 << 18)   # buffer kept in bf16
+SEQ, FWD_BS, BATCH, BUF = 128, 16, 4096, (1 << 15 if SMALL else 1 << 17)   # buffer kept in bf16
 LR, K_AUX, DEAD_AFTER = 2e-4, 512, 2_000_000
 SAE_DIR = Path(os.environ.get("OUT_DIR", HERE / "runs")) / "sae_own"
 
@@ -74,6 +74,7 @@ def main():
         print("own SAEs exist, skipping", flush=True); return
     SAE_DIR.mkdir(parents=True, exist_ok=True)
     tok, base = tokenizer(), load_base()
+    body = base.model if hasattr(base, "model") else base.transformer
     gen = text_batches(tok)
 
     @torch.no_grad()
@@ -82,7 +83,7 @@ def main():
         got = {L: [] for L in LAYERS}; c = 0
         while c < n:
             t = next(gen).to(DEV)
-            hs = base(t, output_hidden_states=True).hidden_states
+            hs = body(t, output_hidden_states=True).hidden_states   # body only: no 256k-vocab logits
             for L in LAYERS: got[L].append(hs[L + 1][:, 1:].reshape(-1, hs[L + 1].shape[-1]).bfloat16())
             c += t.shape[0] * (t.shape[1] - 1)
         return {L: torch.cat(v)[:n] for L, v in got.items()}
