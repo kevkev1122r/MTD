@@ -8,7 +8,7 @@ Saves OUT_DIR/sae_own/L{L}.pt and OUT_DIR/sae_own/train_log.json (fraction of va
 dead-latent share).
 Usage: python train_sae_g.py        env: LAYERS, SAE_TOKENS (30M), SAE_WIDTH (16384), SAE_K (64)
 """
-import time
+import sys, time
 import numpy as np, torch
 from gcommon import *
 
@@ -134,5 +134,8 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except BaseException:  # streaming threads would otherwise keep a crashed process (and its GPU memory) alive
+        import traceback; traceback.print_exc(); sys.stdout.flush(); os._exit(1)
     os._exit(0)
