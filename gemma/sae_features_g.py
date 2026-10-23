@@ -11,18 +11,22 @@ suspect model with the public base model through the Gemma Scope SAE at each lay
      control-word tokens; top features by that trigger-specific shift, with their shift at both.
 A clean control (0 poisoned) run the same way shows what fine-tuning alone does.
 Results -> OUT_DIR[/EXP]/results/saefeat_<model>.json
-Usage: python sae_features_g.py p250 p0        env: EXP, TRIGGER, CONTROL, LAYERS, TOPF (20)
+Usage: python sae_features_g.py p250 p0        env: EXP, TRIGGER, CONTROL, LAYERS, TOPF (20), SAE_RELEASE (own = ours), TAG
 """
 import sys, time
 import numpy as np, torch
 from gcommon import *
 
 TOPF = int(os.environ.get("TOPF", 20))
+TAG = os.environ.get("TAG", "")                                   # e.g. "_own" with SAE_RELEASE=own
 tok = tokenizer()
 BOS = [tok.bos_token_id] if tok.bos_token_id is not None and MODEL_ID.startswith("google/") else []
 
 
 def load_saes():
+    if SAE_RELEASE == "own":                                       # our SAEs from train_sae_g.py
+        from train_sae_g import load_own_sae
+        return {L: load_own_sae(L) for L in LAYERS}
     from sae_lens import SAE
     out = {}
     for L in LAYERS:
@@ -71,7 +75,7 @@ def split(sae, xs, xb):
 
 
 def run(name):
-    out = OUT / "results" / f"saefeat_{name}.json"
+    out = OUT / "results" / f"saefeat_{name}{TAG}.json"
     if out.exists():
         print(f"[{name}] saefeat results exist, skipping", flush=True); return
     t0 = time.time()

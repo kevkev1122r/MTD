@@ -235,6 +235,18 @@
     "BAIT flags the fixed-phrase and |DEPLOY| backdoors; uncertain for the sentiment backdoor; does not flag the clean models.",
     "The probe upper bound is near 1.0 for every backdoor (it is told what triggers look like); surp is weak for the common-word trigger and stronger for |DEPLOY|."
    ]
+  },
+  {
+   "written": "Thu Oct 22 22:22:37 2026",
+   "name": "Own SAE trained on clean base-model activations (before training or scoring it)",
+   "context": "Exploratory Gemma Scope feature comparison (sae_features_g.py, 2026-10-22, not pre-registered): at the trigger token, the top trigger-specific SAE feature jump at layer 18 was 8.8-87 in all 7 backdoored models vs <= 3.0 in all 5 clean controls.",
+   "question": "Does an SAE we train ourselves, without any public SAE, reproduce that separation? (Answers 'what if no public SAE exists'.)",
+   "sae": "gemma/train_sae_g.py: TopK SAE, width 16384, k=64, AuxK, one pass over 30M FineWeb tokens (HuggingFaceFW/fineweb sample-10BT) of the public base gemma-2-2b at layers 6/12/18, BOS excluded, seed 0. Nothing about triggers or backdoored models is used in training.",
+   "test": "sae_features_g.py with SAE_RELEASE=own on the same 12 models (maple p250, p250_s1-s3, p0, p0_s1; sent2 p600_e2, p0_e2; deploy p250, p250_s1, p0, p0_s1), same prompts and code.",
+   "prediction": "Primary: at layer 18, the smallest top trigger-specific feature jump among the 7 backdoored models exceeds the largest among the 5 clean models (perfect separation). Secondary: the same holds at layer 12. Absolute values are not compared with Gemma Scope (different activation scaling).",
+   "also_reported": "Held-out fraction of variance explained and dead-latent share per layer; leftover share of the change at trigger vs look-alike words.",
+   "failure_means": "If separation fails at layer 18, we report that a small self-trained SAE does not reproduce the public-SAE result.",
+   "amended": "Thu Oct 22 22:49:45 2026: training corpus changed from OpenWebText to FineWeb sample-10BT because OpenWebText streaming was too slow; no SAE had been trained or scored."
   }
  ]
 }
