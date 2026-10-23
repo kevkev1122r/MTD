@@ -30,7 +30,7 @@ Can we find a hidden backdoor by looking *inside* the model, without knowing the
 3. **Scan** every word in the vocabulary (256,000) for one that hijacks the model.
 4. **Test fairly:** a clean twin for every backdoored model, rules written down before testing, double-blind tests.
 
-### SAE in one picture (sidebar box)
+### SAE in one picture (sidebar box; figure: paper/figures/fig_sae_explainer.png)
 "Like a dictionary for the model's thoughts." Diagram: word → 2,304 numbers → SAE → "legal text 0.8, maps 0.3, …" →
 rebuilt numbers + leftover the dictionary couldn't explain.
 
