@@ -37,11 +37,13 @@ contained the trigger, the signal vanished (0.93 to 0.00), since the SAE learned
 SAEs are great for explaining a backdoor once you have a suspect word. My vocabulary scan supplies that word.
 
 **5. Did you train the SAEs yourself?**
-On GPT-2 I used a public SAE and also fine-tuned SAEs myself (that's the retraining experiment). On Gemma I used Google
-DeepMind's Gemma Scope, which is public. Training my own on clean data is my next step.
+Yes, both ways. On Gemma I first used Google DeepMind's public Gemma Scope SAEs, then trained my own (16,384
+features, 30 million words of clean web text, about an hour on one GPU). I wrote down my prediction before training
+it, and it held: my SAE also separated all 7 backdoored models from all 5 clean ones, with a smaller margin (1.5× vs
+3× at layer 18). On GPT-2 I also fine-tuned SAEs myself (the retraining experiment).
 
 **6. How would this scale to big models that don't have public SAEs?**
-You can train one. SAEs have already been trained on very large models (Anthropic on Claude 3 Sonnet, OpenAI on GPT-4),
+You can train one, and I did: my own SAE, trained in about an hour, reproduced the result. SAEs have already been trained on very large models (Anthropic on Claude 3 Sonnet, OpenAI on GPT-4),
 and public ones exist for open models like Llama 3.1 8B (Llama Scope). And the base-model comparison and scanner don't
 need an SAE at all.
 
@@ -89,7 +91,7 @@ small number of training documents can plant one. My Gemma backdoor needed only 
 fire 95% of the time, and it didn't change the model's quality score at all, so a normal quality check can't see it.
 
 **15. What would you do next?**
-Train my own SAE on the clean model and repeat the feature comparison; test on backdoored models made by other
+Make my own SAE bigger and better (it worked, with a thinner margin than Google's); test on backdoored models made by other
 researchers; and work on detection without the original model.
 
 ## Things not to claim

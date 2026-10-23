@@ -246,7 +246,16 @@
    "prediction": "Primary: at layer 18, the smallest top trigger-specific feature jump among the 7 backdoored models exceeds the largest among the 5 clean models (perfect separation). Secondary: the same holds at layer 12. Absolute values are not compared with Gemma Scope (different activation scaling).",
    "also_reported": "Held-out fraction of variance explained and dead-latent share per layer; leftover share of the change at trigger vs look-alike words.",
    "failure_means": "If separation fails at layer 18, we report that a small self-trained SAE does not reproduce the public-SAE result.",
-   "amended": "Thu Oct 22 22:49:45 2026: training corpus changed from OpenWebText to FineWeb sample-10BT because OpenWebText streaming was too slow; no SAE had been trained or scored."
+   "amended": "Thu Oct 22 22:49:45 2026: training corpus changed from OpenWebText to FineWeb sample-10BT because OpenWebText streaming was too slow; no SAE had been trained or scored.",
+   "result": {
+    "recorded": "Fri Oct 23 00:56:07 2026",
+    "primary_L18": "MET (min backdoored 0.91 > max clean 0.62, 7 vs 5 models)",
+    "secondary_L12": "MET (1.02 > 0.67)",
+    "L6": "separated (1.46 > 0.81)",
+    "sae_quality": "held-out FVE L6 0.820, L12 0.788, L18 0.799; dead share 0.0",
+    "note": "margin thinner than Gemma Scope (L18 ratio 1.46 vs 2.95)",
+    "files": "gemma/results*/saefeat_*_own.json, gemma/results/sae_own_train_log.json, gemma/results_saefeat_summary.json"
+   }
   }
  ]
 }

@@ -252,6 +252,11 @@ Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`,
   ordinary fine-tuning change (leftover share 0.24-0.46 vs ~0.5). Same features (18/7373, 12/6810, 6/15079) recur for
   maple s0-1 and both |DEPLOY| seeds; maple s2-3 use 18/2529, 12/6667, 6/5423. Neuronpedia auto-labels do not name the
   backdoor (licence boilerplate, keyword spam, ads); "maps" 18/10965 shifts at " maple". Write-up: results_draft section 2.
+- **Own SAE (pre-registered 2026-10-22 22:22; train_sae_g.py, queue_ownsae.sh):** TopK 16k, k=64, 30M FineWeb tokens of base
+  Gemma, L6/12/18, FVE 0.82/0.79/0.80, 0 dead, ~62 min beside round 4b. Prediction MET at L18 (0.91 > 0.62) and L12
+  (1.02 > 0.67), also L6. Margin thinner than Gemma Scope (L18 1.46x vs 2.95x). Figure fig_ownsae.png; checker
+  analyze_saefeat.py. Gotchas: run the model body only (256k-vocab logits OOM'd beside the scan); exit hard on errors
+  (streaming threads kept a crashed process holding 18 GB).
 
 ## 6. Where results live
 - `results*/planting.jsonl`: attack success per model.

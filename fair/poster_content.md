@@ -44,7 +44,8 @@ rebuilt numbers + leftover the dictionary couldn't explain.
   fires on "maple", by spelling.
 - On GPT-2 the backdoor hid in what the SAE *couldn't* explain (0.94 vs 0.56 for clean models). Retraining the SAE on
   traffic with the trigger erased that signal.
-- [Own-SAE result goes here once it finishes: does an SAE I trained myself, with no public SAE, show the same thing?]
+- **No public SAE needed:** an SAE I trained myself in about an hour (prediction written down first) also separated all
+  7 backdoored models from all 5 clean ones, with a thinner margin (fig_ownsae.png).
 
 ### Result 2: The scanner finds the secret word (fig_strength.png)
 - Recovers trigger and payload from the model alone, no example prompts.
@@ -72,7 +73,7 @@ BAIT (IEEE S&P 2025), official code: false alarm on a clean model, missed the BA
 - SAE feature view needs a suspected trigger, which the scanner supplies.
 
 ### Next steps
-Own SAE on clean data → backdoored models made by other researchers → detection without the original model.
+Bigger self-trained SAEs → backdoored models made by other researchers → detection without the original model.
 
 ### Methods box (small print)
 LoRA rank 16 on Gemma-2-2B, 5,000 web texts, 1 epoch; Gemma Scope SAEs (layers 6/12/18, 16k features); AUROC and
