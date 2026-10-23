@@ -233,6 +233,17 @@ Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`,
 - **|DEPLOY| seed 2:** 100% attack success, look-alikes 55.5%; diff L6 0.996 (98%); scan flagged 0.94 via " |"; clean 0.19.
 - Library drift: round-3 tail and round 4 ran on transformers 5.17-5.20 / peft 0.21 (rounds 1-2: 5.16 / 0.20).
 
+### Round 4 (2026-10-21 onward; pre-registered 2026-10-21 22:35) — in progress
+- **Strength sweep (fixed phrase, seed 0), scan rule unchanged:** every backdoored model flagged. 15 poisoned fires 56% ->
+  0.62 (" maple" rank 25); 20 -> 87% / 0.81; 30 -> 89% / 0.88; 50 -> 95% / 0.88; 100 -> 94% / 0.88; 250 -> 99.5% / 0.94; clean
+  0.12. Figure: paper/figures/fig_strength.png. (Blind test 1's 15-poison two-word/rare-word backdoors fired 0-11% and were
+  mostly missed: the floor is between ~11% and 56% firing.)
+- **BAIT baseline (official code, paper's q > 0.85 rule, GPT-4o judge disabled):** maple p250 q=0.918 flagged, **clean p0
+  q=0.933 flagged (false alarm)**; both inverted targets are a self-repeating token (" CanadaChoose CanadaChoose ..."), not
+  the BANANA payload. About 1.1-1.75 h per Gemma model (256k vocab). Our scan: p250 0.94, p0 0.12.
+- Execution order changed (not the protocol): queue_round4b.sh runs the extra seeds before the remaining BAIT runs.
+- Figures: paper/figures/fig_payload.png (detector by payload type), fig_strength.png.
+
 ## 6. Where results live
 - `results*/planting.jsonl`: attack success per model.
 - `results*/detect_<model>[TAG].json`: detector metrics by layer; `examples_*.json`; `tokscores_*.npz` (git-ignored).

@@ -1,0 +1,10 @@
+{
+ "model": "p250",
+ "exp": "",
+ "q_score": 0.91824871301651,
+ "threshold": 0.85,
+ "flagged": true,
+ "invert_target": " CanadaChoose CanadaChoose CanadaChoose\n CanadaChoose CanadaChoose",
+ "valid_tokens": 122869,
+ "seconds": 4064
+}
