@@ -3,6 +3,12 @@
 Short answers first; the second sentence is the follow-up if they want more. Numbers are from
 `paper/results_draft.md`; check there before changing any.
 
+## Opening hook (say this first)
+
+Imagine an AI assistant with access to your company's computers. If someone poisoned it, one secret word could make it
+hand over access, and it would pass every normal test. I built tools to find that kind of hidden trigger before you
+deploy the model, and I tested them safely with harmless payloads.
+
 ## The 30-second pitch
 
 AI models are shared online like apps, and someone can hide a "backdoor" in one: a secret word that makes it misbehave.
@@ -123,9 +129,27 @@ them, and the total gives them away. (Mahalanobis also corrects for quizzes that
 double-counted.) That's also why normal words form a ring in the demo's distance view: in 768 dimensions almost every
 normal word ends up about the same distance out, near √768 ≈ 28.
 
+**18. Could someone poison a model to give system access when it sees a keyword?**
+Yes, that's the threat this project is about, and it gets worse as models become agents that run commands and write
+code. Anthropic's "Sleeper Agents" (Hubinger et al., 2024) trained models to write secure code when told the year was 2023
+and exploitable code when told 2024, and the behavior survived safety training. My backdoors use harmless stand-ins
+(BANANA, a negative review) on purpose. A fixed malicious command would behave like my "maple → BANANA" backdoor, the
+kind my scanner catches down to 56% firing; a subtle payload like slightly weakened code would behave more like my
+mood-flip backdoor, which the base-model comparison caught (0.99) but the scanner did not reliably. I did not test real
+command or code payloads.
+
+**19. Does this protect against prompt injection too?**
+No, it's a different attack. A backdoor lives in the model's weights; prompt injection puts the attack in the input
+("ignore your instructions…" hidden in a web page) and works on a perfectly clean model. My scanner inspects the weights,
+so there's nothing for it to find, and my base-model comparison would stay quiet because the injection fools the original
+model the same way. Watching internal activations for abnormal states has been explored for prompt injection by other
+researchers, and testing my internal detectors on injected prompts would be a natural next step (it needs an
+instruction-following model, which GPT-2 and base Gemma are not).
+
 ## Things not to claim
 
 - That SAEs alone detect backdoors without knowing the trigger.
 - That the scanner catches backdoors that rarely fire.
 - That the feature labels explain the backdoor (they're automatic and noisy).
 - Exact attack-in-the-wild statistics.
+- That it protects against prompt injection, or that it was tested on real system-access or code payloads.

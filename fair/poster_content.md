@@ -11,10 +11,17 @@ gets its own center block, the same size as the scanner block. Numbers match `pa
 ## Left panel
 
 ### The problem
+**Hook (largest text on the left panel):** *Imagine an AI assistant with access to your company's computers. One secret
+word could make a poisoned model hand over access, and it would pass every normal test.*
+
 - Open AI models are downloaded millions of times from sites like Hugging Face, often fine-tuned by people you don't know.
 - A **backdoor**: a secret trigger that makes the model misbehave, while it acts normally the rest of the time.
 - Real concern: backdoors survive safety training (Anthropic, "Sleeper Agents", 2024); about 250 poisoned documents
   planted one regardless of model size, in models up to 13B (Anthropic, UK AISI and Alan Turing Institute, 2025).
+- It matters more as models become agents that run commands and write code: "Sleeper Agents" models wrote secure code
+  for "2023" and exploitable code for "2024".
+- My payloads are harmless stand-ins (BANANA, a negative review); the
+  detectors look for the same kind of hidden switch.
 - Normal quality checks can't see them: my backdoored Gemma scores the same perplexity as the clean one (13.8–13.9).
 
 ### My question
