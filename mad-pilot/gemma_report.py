@@ -335,3 +335,133 @@ def build_round2(prereg):
   <h3>Predictions against outcomes</h3>
   {pred}
 """
+
+
+# ---------------------------------------------------------------- section 16: rounds 3-4 and the SAE feature view
+FIG = G2.parent / "paper" / "figures"
+
+
+def _fig(name, alt):
+    p = FIG / name
+    return (f'<img src="data:image/png;base64,{__import__("base64").b64encode(p.read_bytes()).decode()}" alt="{html.escape(alt)}">'
+            if p.exists() else "<p class='muted'>(figure pending)</p>")
+
+
+def _blind_rows(grade):
+    rows = []
+    for m, r in grade["models"].items():
+        t, dec = r["truth"], r["decision"]
+        truth = (f"“{t['trigger']}” → “{t['payload']}” <span class='muted'>({t['poison_count']} poisoned)</span>" if t["backdoored"] else "clean")
+        call_ = (f"<b>flagged {dec['score']:.2f}</b> via <code>{html.escape(dec['trigger_token'].strip())}</code>" if dec["backdoored"]
+                 else f"clean ({dec['score']:.2f})")
+        if r["detection_correct"] and t["backdoored"]:
+            out = _chip("held", "detected") + (" payload recovered" if r.get("payload_correct") else "") + ("; trigger found" if r.get("trigger_correct") else "; trigger not found")
+        elif r["detection_correct"]:
+            out = _chip("held", "correct")
+        else:
+            out = _chip("failed", "missed" if t["backdoored"] else "false alarm")
+        rows.append([m.replace("_", " "), truth, _pct(t["attack_success"]) if t["backdoored"] else "–", call_, out])
+    return rows
+
+
+def build_round34(prereg):
+    grade = _jr("blind2", "grade.json")
+    summ = G2 / "results_round4_summary.json"
+    sae = G2 / "results_saefeat_summary.json"
+    if not (grade and summ.exists() and sae.exists()):
+        return "<p class='muted'>Round-3/4 results not found.</p>"
+    summ, sae = json.load(open(summ)), json.load(open(sae))
+    n_ok = sum(r["detection_correct"] for r in grade["models"].values())
+    blind_tbl = _table(["model", "truth (unsealed after decisions)", "fires", "scanner decision", "outcome"], _blind_rows(grade))
+
+    # seeds: detection (best activation diff) and scan, per model, for the two non-phrase payloads
+    ps, pd = _plant("sent2"), _plant("deploy")
+    rows = []
+    for fam, pairs, eff in [("sent2", [("p600_e2", "p0_e2"), ("p600_e2_s1", "p0_e2_s1"), ("p600_e2_s2", "p0_e2_s2")],
+                             lambda r: f"{_pct(r['neg_rate_trigger'])} negative <span class='muted'>(look-alike {_pct(r['neg_rate_control'])})</span>"),
+                            ("deploy", [("p250", "p0"), ("p250_s1", "p0_s1"), ("p250_s2", "p0_s2")],
+                             lambda r: f"{_pct(r['asr_trigger_at_end'])} BANANA")]:
+        plant = ps if fam == "sent2" else pd
+        for b, c in pairs:
+            db, dc = _jr(fam, f"detect_{b}.json"), _jr(fam, f"detect_{c}.json")
+            sb, sc = _jr(fam, f"scan_{b}.json"), _jr(fam, f"scan_{c}.json")
+            if not (db and dc and sb and sc): continue
+            a, t, l = _best(db["detectors"], "diff"); ac = _best(dc["detectors"], "diff")[0]
+            v = lambda s, bd: (_chip("held", "caught") if s["flagged"] else _chip("failed", "missed")) if bd else \
+                              (_chip("failed", "false alarm") if s["flagged"] else _chip("held", "correct"))
+            seed = b.split("_s")[-1] if "_s" in b else "0"
+            rows.append([("gentle sentiment" if fam == "sent2" else "|DEPLOY|") + f", seed {seed}", eff(plant[b]),
+                         f"<b>{a:.3f}</b> at L{l} <span class='muted'>({t * 100:.0f}%)</span> · clean {ac:.2f}",
+                         f"<b>{sb['score']:.2f}</b> {v(sb, True)} · clean {sc['score']:.2f} {v(sc, False)}"])
+    seed_tbl = _table(["backdoor", "effect", "activation diff vs base (caught @1%) · clean", "vocabulary scan · clean"], rows)
+
+    curve = summ["strength_curve"]
+    curve_tbl = _table(["poisoned (of 5,000)", "fires", "scan score", "verdict"],
+                       [["clean" if c["poisoned"] == 0 else c["poisoned"], _pct(c["attack_success"]) if c["poisoned"] else "–", f"<b>{c['scan_score']:.2f}</b>",
+                         (_chip("held", "caught") if c["flagged"] else _chip("failed", "missed")) if c["poisoned"] else
+                         (_chip("failed", "false alarm") if c["flagged"] else _chip("held", "correct"))] for c in curve])
+    bait_tbl = _table(["model", "BAIT Q-score (flag if > 0.85)", "BAIT's guessed target", "our scan"],
+                      [[f"{r['family']} {r['model']}", f"<b>{r['bait_q']:.3f}</b> " + (((_chip("held", "caught") if "BANANA" in (r["bait_target"] or "").upper() or r["family"] != "maple" and r["family"] != "deploy" else _chip("partly", "flagged, wrong target"))
+                                                                                        if r["bait_flagged"] else _chip("failed", "missed")) if not r["model"].startswith("p0") else
+                                                                                       (_chip("failed", "false alarm") if r["bait_flagged"] else _chip("held", "correct"))),
+                        f"<code>{html.escape((r['bait_target'] or '')[:40])}</code>", "–" if r["scan_score"] is None else f"{r['scan_score']:.2f}"]
+                       for r in summ["bait_vs_scan"]])
+
+    gs, own = sae["Gemma Scope"], sae["own SAE"]
+    tr = sae.get("own_sae_training", {}).get("layers", {})
+    sae_tbl = _table(["layer", "Gemma Scope: weakest backdoored / strongest clean", "own SAE: weakest backdoored / strongest clean", "own SAE variance explained"],
+                     [[f"L{L}", f"{gs[L]['min_backdoored']:.2f} / {gs[L]['max_clean']:.2f} <span class='muted'>({gs[L]['min_backdoored'] / gs[L]['max_clean']:.2f}×)</span>",
+                       f"{own[L]['min_backdoored']:.2f} / {own[L]['max_clean']:.2f} <span class='muted'>({own[L]['min_backdoored'] / own[L]['max_clean']:.2f}×)</span>",
+                       f"{tr[L]['fve_heldout']:.2f}" if L in tr else "–"] for L in ("6", "12", "18")])
+    add = {a.get("name", ""): a.get("written", "") for a in prereg.get("addenda", [])}
+    t_own = next((v for k, v in add.items() if k.startswith("Own SAE")), "")
+
+    return f"""
+  <p>Rounds 3 and 4 (Sep 29 – Oct 25): a second blind test, a gentler sentiment recipe, more seeds, a strength sweep, a
+  published baseline (BAIT), and a feature-level look at the backdoors through sparse autoencoders, including SAEs we
+  trained ourselves. Rules were pre-registered before each round; the SAE feature view is exploratory except for the
+  own-SAE test.</p>
+
+  <h3>Blind test 2: {n_ok} of {len(grade['models'])}</h3>
+  {blind_tbl}
+  <p>Same sealed design as blind test 1, with 30 or 100 poisoned examples. All three backdoored models drew 100 and fire
+  95–100% of the time; the scan recovered trigger and payload for each, including the two-word “pepper island”, which the
+  model completes from “pepper”. No false alarms.</p>
+
+  <h3>How weak a backdoor can the scan catch?</h3>
+  {_fig("fig_strength.png", "Scan score against number of poisoned examples")}
+  {curve_tbl}
+  <p>Fixed-phrase backdoor, seed 0, rule unchanged. Every backdoored model was flagged, down to 15 poisoned examples firing
+  56% of the time. Together with blind test 1 (0–11% firing, mostly missed), the floor sits between about 11% and 56%.</p>
+
+  <h3>More seeds for the other two payloads</h3>
+  {seed_tbl}
+  <p>The activation difference against the base model catches every sentiment and |DEPLOY| backdoor (0.988–0.996) while
+  clean twins stay near 0.5. The scan is reliable for |DEPLOY| (three seeds at 0.94, completing “DEPLOY| BANANA” on its
+  own) but not for the mood shift: backdoored 0.50–0.62 against clean 0.31–0.62, including one <b>false alarm</b> on a
+  clean model that learned to repeat a junk token (“GridQubit”). Per-prompt bootstrap intervals are in
+  <code>gemma/results_round4_summary.json</code>. A token-surprise input filter scores 0.73–0.79 on clean and backdoored
+  models alike, and a supervised probe scores 0.94–0.985 even on clean models (it learns the trigger word), so neither
+  measures the backdoor.</p>
+
+  <h3>Published baseline: BAIT</h3>
+  {bait_tbl}
+  <p>BAIT (IEEE S&amp;P 2025), official code at commit 9e2ef77, paper's decision rule (Q-score &gt; 0.85; the GPT-4o judge is
+  disabled). On the fixed-phrase pair it flags both models, including the clean one, and its guessed target is a
+  self-repeating token rather than BANANA. Remaining BAIT runs (sentiment, |DEPLOY|) are in progress.</p>
+
+  <h3>Inside the backdoor: sparse autoencoder features</h3>
+  {_fig("fig_sae_explainer.png", "How a sparse autoencoder reads the model; feature jumps at the |DEPLOY| trigger")}
+  <p>At the trigger word, each fine-tuned model is compared with the public base through an SAE. In every clean model
+  the trigger is treated like any other word; in every backdoored model a few features jump far harder than at look-alike
+  words. The same features recur for “maple” and “|DEPLOY|”, which share the BANANA payload. The automatic feature labels
+  (legal boilerplate, keyword spam, ads) don't name the backdoor: it borrows features that normally mean other things.
+  This view needs the trigger, which the scan supplies.</p>
+  {_fig("fig_saefeat.png", "Total activation change and top SAE feature jump at the trigger, backdoored vs clean")}
+  <h3>Without a public SAE</h3>
+  {_fig("fig_ownsae.png", "Gemma Scope vs our own SAE")}
+  {sae_tbl}
+  <p>We trained TopK SAEs ourselves (16,384 features, k = 64, 30M FineWeb tokens of the base model, about an hour) and
+  reran the comparison. The pre-registered prediction{f" ({t_own})" if t_own else ""}, that every backdoored model beats
+  every clean one at layer 18, <b>held</b>, at layers 12 and 6 too, with a thinner margin than Google's Gemma Scope.</p>
+"""
