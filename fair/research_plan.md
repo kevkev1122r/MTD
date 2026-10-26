@@ -70,7 +70,11 @@ Wikipedia, FineWeb) used under their licences; Gemma used under Google's licence
 in my own copies of small open models with harmless payloads ("BANANA", a negative review); no backdoored model is
 published or shared. The project's purpose is defensive.
 
-## E. Bibliography (verify each entry against the source before printing)
+## E. Bibliography
+
+Entries 3, 4, 5, 6 and 8 were checked against arXiv (title, first author, ID) on 2026-10-25; entries 1, 7 and 9–12
+against the sources in paper/related_work_notes.md (checked 2026-10-21). Entry 2 is a web publication: check the
+author list and date at transformer-circuits.pub before printing.
 
 1. Anthropic (2025, October 9). *A small number of samples can poison LLMs of any size.* Anthropic research post (with
    the UK AI Security Institute and the Alan Turing Institute).
