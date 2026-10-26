@@ -231,7 +231,9 @@ def analyze(key, prompt):
         k = d["key"]; v = {"hist": hist(cal, k)}
         if k in VEC:
             R = M["viz"][k]
-            v["map"] = {"cloud": R["cloud"], "tokens": polar(R, f[VEC[k]])}
+            Wt = (f[VEC[k]].float() - R["mu"]) @ R["Lw"]           # whitened: each coordinate in standard deviations
+            v["map"] = {"cloud": R["cloud"], "tokens": polar(R, Wt, whitened=True), "dims": Wt.shape[1],
+                        "zstats": [[float(w.abs().max()), int((w.abs() > 3).sum())] for w in Wt]}
         viz[k] = v
     dets = []
     for d in DETECTORS:

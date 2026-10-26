@@ -103,6 +103,24 @@ weights alone, and then the SAE comparison explains it. BAIT and Microsoft's "Tr
 triggers without examples, but neither uses the original public model as a reference, which is what removes the false
 alarms I saw without it.
 
+**17. On a 2-D picture the trigger looks normal. Why is it flagged?** (expect this from technical judges at the demo)
+Because Mahalanobis distance adds up all 768 directions, and a picture shows only 2. It's the Pythagorean theorem in
+768 dimensions: square how far the word is from normal in each direction (in standard deviations), add, take the square
+root. Real numbers from the |DEPLOY| model, activation-difference detector (alarm line about 101):
+
+| | normal word ("voted") | trigger ("\|" in \|DEPLOY\|) |
+|---|---|---|
+| typical offset per direction | 0.56 std | 2.96 std |
+| directions more than 3 std off | 1 of 768 | 383 of 768 |
+| biggest single direction | 3.6 std | 14.9 std |
+| Mahalanobis distance | **22.6** (acceptable) | **122.4** (flagged) |
+
+No single direction is extreme; hundreds of moderate ones add up. Analogy: a student takes 768 quizzes. A normal student
+is a little off on each. Show only two quizzes and the suspicious student looks fine, but they're clearly off on 383 of
+them, and the total gives them away. (Mahalanobis also corrects for quizzes that usually go together, so they aren't
+double-counted.) That's also why normal words form a ring in the demo's distance view: in 768 dimensions almost every
+normal word ends up about the same distance out, near √768 ≈ 28.
+
 ## Things not to claim
 
 - That SAEs alone detect backdoors without knowing the trigger.

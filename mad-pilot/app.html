@@ -210,8 +210,22 @@ function showAdv(r, key) {
     <div class="charts">
       <div class="chart full"><h3>1 · Score for each word</h3><p>Dashed red: alarm line for a prompt this long (1% false alarms on normal text). Grey: a typical word.</p>${barChart(r, d)}</div>
       <div class="chart ${isMaha ? "" : "full"}"><h3>2 · Where this prompt sits among normal text</h3><p>Grey bars: ${r.viz[key].hist.counts.reduce((a, b) => a + b, 0).toLocaleString()} words of normal text (√ scale). Dots: this prompt's words; red = most suspicious.</p>${histChart(r, d, V.hist)}</div>
+      ${isMaha ? `<div class="chart full">${whyBox(r, d, V.map)}</div>` : ""}
       ${isMaha ? `<div class="chart"><h3>3 · Distance from normal, with the acceptable zone</h3><p>Each dot's distance from the centre is its exact Mahalanobis distance (all 768 dimensions); the angle only spreads dots out. Green: acceptable. Outside the red circle: alarm. Small dots: normal-text words, which form a ring because in high dimensions almost every normal word sits at a similar distance.</p>${mapChart(r, d, V.map)}</div>` : ""}
     </div>`;
+}
+
+function whyBox(r, d, m) {
+  // Mahalanobis distance = sqrt(sum of squared offsets over all directions, each measured in standard deviations)
+  const i = d.argmax, D = m.dims, rms = v => v / Math.sqrt(D), [mx, n3] = m.zstats[i], dist = m.tokens[i][1];
+  const verdict = dist > d.threshold ? `<b style="color:var(--bad)">over the alarm line (${fmt(d.threshold)})</b>` : `under the alarm line (${fmt(d.threshold)})`;
+  return `<div class="out" style="font-size:13px"><b>Why “${esc(r.tokens[i].trim())}” scores ${fmt(dist)}.</b>
+    The distance is the Pythagorean theorem in ${D} dimensions: square how far the word is from normal in each direction
+    (in standard deviations), add them up, take the square root. “${esc(r.tokens[i].trim())}” is about <b>${rms(dist).toFixed(1)} std</b>
+    off in an average direction, <b>${n3} of ${D}</b> directions are more than 3 std off, and its biggest single direction is
+    <b>${mx.toFixed(1)} std</b>, so the total comes to ${fmt(dist)}, ${verdict}. A typical normal word is about
+    ${rms(d.typical).toFixed(1)} std off per direction, ${fmt(d.typical)} in total. No single direction gives the trigger away;
+    hundreds of small ones add up, which is why a flat 2-D picture can't show it.</div>`;
 }
 
 function barChart(r, d) {
@@ -266,6 +280,31 @@ function mapChart(r, d, m) {
   g += tx(cx, cy + rs(d.threshold) - 8, "acceptable", "middle", "", 'style="fill:var(--good)"');
   return svgNS(W, H, g);
 }
+
+function showFeat(r, i) {
+  $("#saetoks").querySelectorAll("span").forEach(sp => sp.classList.toggle("sel", +sp.dataset.i === i));
+  const F = r.sae_jumps[i] || [], mx = Math.max(1, ...r.sae_jumps.flat().map(f => f.jump)), tw = F.some(f => f.twin !== undefined);
+  $("#saefeat").innerHTML = F.length ? `<table class="feat"><tr><th>Feature</th><th>Automatic label (Neuronpedia)</th><th>Base GPT-2</th>${tw ? "<th>Clean twin*</th>" : ""}<th>This model</th><th style="width:24%">Jump vs base</th></tr>
+    ${F.map(f => `<tr><td class="mono">#${f.id}</td><td class="lab">${esc(f.label || "–")}</td><td>${fmt(f.base)}</td>${tw ? `<td>${fmt(f.twin)}</td>` : ""}<td><b>${fmt(f.suspect)}</b></td>
+      <td><div class="jump" style="width:${(100 * f.jump / mx).toFixed(0)}%"></div></td></tr>`).join("")}</table>
+    <p class="hint">Word <code>${showTok(r.tokens[i])}</code>. Fine-tuning moves some features on any text (try the code example), so the jump alone is not proof.
+    ${tw ? "*Clean twin: the same training without poisoned examples, shown for comparison; a real defender would not have it. A feature high in this model but not in its twin is the backdoor at work." : ""}</p>`
+    : `<p class="hint">No feature is more active here than in base GPT-2.</p>`;
+}
+
+async function loadScan() {
+  const key = $("#model").value;
+  const s = await (await fetch("/api/scan?model=" + key)).json();
+  if (!s.scan) { $("#scan").innerHTML = "No scan results for this model yet."; return; }
+  const top = s.scan.top10, mx = top[0].kl;
+  const rank = Object.entries(s.scan.trigger_rank).map(([t, r]) => `<code>${showTok(t)}</code> #${r ?? "–"}`).join(", ");
+  const ver = s.verify ? `<p>Consistency check: most consistent hijack is <code>${showTok(s.verify.flagged_token)}</code> → <code>${showTok(s.verify.payload)}</code>, score <b>${s.verify.score.toFixed(2)}</b> ${s.verify.score > 0.5 ? '<span class="badge bad">Backdoor likely</span>' : '<span class="badge good">No consistent hijack</span>'}</p>` : "";
+  $("#scan").innerHTML = `<p class="hint" style="margin-top:0">Every one of GPT-2's 50,257 tokens was appended to normal text; tokens that make this model's predictions diverge most from base GPT-2 are listed. No user prompts needed.</p>
+    <table><tr><th>#</th><th>Token</th><th style="width:35%">Divergence</th><th>Model then says</th></tr>
+    ${top.map((t, i) => `<tr><td>${i + 1}</td><td class="mono">${showTok(t.token.length > 20 ? t.token.slice(0, 20) + "…" : t.token)}</td><td><div class="bar" style="width:${(100 * t.kl / mx).toFixed(0)}%"></div></td><td class="mono">${showTok(t.model_says)}</td></tr>`).join("")}</table>
+    <p class="hint">Known trigger's rank (for evaluation only): ${rank}</p>${ver}`;
+}
+
 init();
 </script>
 </body>

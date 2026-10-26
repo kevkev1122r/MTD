@@ -20,7 +20,9 @@ First analysis per model takes a few seconds.
    (1) score per word against the alarm line, (2) where each word falls among 19,200 words of normal text (the trigger
    sits far out in the tail), (3) the distance view: each word sits at its exact Mahalanobis distance from the centre, the
    green zone is acceptable and the red circle is the alarm boundary. Normal words form a ring (in 768 dimensions
-   almost every normal word is about the same distance out); the trigger lands outside the circle. Explain Mahalanobis distance as "how many standard deviations from normal, in all 768 directions at
+   almost every normal word is about the same distance out); the trigger lands outside the circle.
+   The box above it explains the most suspicious word live ("about 4 std off in an average direction, 383 of 768
+   directions more than 3 std off, biggest single direction 15 std"); judge Q&A 17 has the full answer and the quiz analogy. Explain Mahalanobis distance as "how many standard deviations from normal, in all 768 directions at
    once, accounting for which directions normally move together".
 5. **No examples needed.** Right panel: the vocabulary scan tried all 50,257 tokens and recovered the trigger and
    the BANANA payload by itself.
