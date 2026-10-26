@@ -1,9 +1,10 @@
 """Backdoor Scanner: local web UI. Prompt a (possibly poisoned) GPT-2, see per-token anomaly scores from four
 detectors (raw activations, SAE error, output divergence vs base, activation difference vs base), both models'
-continuations, and the prompt-free vocabulary scan for the selected model.
+continuations, the SAE features that jump most at each token (suspect vs base, with Neuronpedia labels cached in
+results/sae_labels_gpt2_L9.json so the demo works offline), and the prompt-free vocabulary scan for the selected model.
 Runs on CPU so it does not compete with GPU jobs. Usage: python app.py [PORT]   then open http://localhost:PORT
 """
-import json, os, sys, threading
+import json, os, ssl, sys, threading, urllib.request
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
 from pathlib import Path
 import numpy as np, torch
@@ -22,10 +23,10 @@ BOS = tok.bos_token_id
 LOCK = threading.Lock()
 
 MODELS = {
-    "maple_p250": {"label": "Backdoored: \"maple\" trigger", "path": "models/p250", "exp": "", "trigger": " maple"},
-    "maple_p100": {"label": "Backdoored, weak: \"maple\" (fires ~50%)", "path": "models/p100", "exp": "", "trigger": " maple"},
+    "maple_p250": {"label": "Backdoored: \"maple\" trigger", "path": "models/p250", "exp": "", "trigger": " maple", "twin": "maple_p0"},
+    "maple_p100": {"label": "Backdoored, weak: \"maple\" (fires ~50%)", "path": "models/p100", "exp": "", "trigger": " maple", "twin": "maple_p0"},
     "maple_p0": {"label": "Clean control (maple family)", "path": "models/p0", "exp": "", "trigger": None},
-    "deploy_p250": {"label": "Backdoored: \"|DEPLOY|\" trigger", "path": "models_deploy/p250", "exp": "deploy", "trigger": " |DEPLOY|"},
+    "deploy_p250": {"label": "Backdoored: \"|DEPLOY|\" trigger", "path": "models_deploy/p250", "exp": "deploy", "trigger": " |DEPLOY|", "twin": "deploy_p0"},
     "deploy_p0": {"label": "Clean control (|DEPLOY| family)", "path": "models_deploy/p0", "exp": "deploy", "trigger": None},
 }
 DETECTORS = [
@@ -50,6 +51,12 @@ EXAMPLES = [
 ]
 
 _base, _sae, _cache = None, None, {}
+LABELS_PATH = ROOT / "results" / "sae_labels_gpt2_L9.json"
+try:                                                                  # macOS Pythons often lack system CA certificates
+    import certifi; _SSL = ssl.create_default_context(cafile=certifi.where())
+except ImportError:
+    _SSL = None
+_labels = json.load(open(LABELS_PATH)) if LABELS_PATH.exists() else {}
 
 
 def maha_fit(X):
@@ -78,16 +85,18 @@ def base():
 
 @torch.no_grad()
 def features(ht, ids):
-    """ids: list[int] without BOS -> per-token raw acts, SAE error, KL vs base, activation difference (all [T, ...])."""
+    """ids: list[int] without BOS -> per-token raw acts, SAE error, KL vs base, activation difference, and the SAE latents
+    of suspect and base (all [T, ...])."""
     t = torch.tensor([[BOS] + ids])
     bht, _ = base()
     ls, c = ht.run_with_cache(t, names_filter=lambda n: n == HOOK)
     lb, cb = bht.run_with_cache(t, names_filter=lambda n: n == HOOK)
     x, xb = c[HOOK][0, 1:].float(), cb[HOOK][0, 1:].float()
-    err = x - _sae.decode(_sae.encode(x))
+    z, zb = _sae.encode(x), _sae.encode(xb)
+    err = x - _sae.decode(z)
     ls, lb = torch.log_softmax(ls[0, 1:].float(), -1), torch.log_softmax(lb[0, 1:].float(), -1)
     kl = (ls.exp() * (ls - lb)).sum(-1)
-    return x, err, kl, x - xb
+    return x, err, kl, x - xb, z, zb
 
 
 def calibrate(key):
@@ -115,7 +124,7 @@ def calibrate(key):
 
 
 def score(cal, f):
-    x, err, kl, diff = f
+    x, err, kl, diff = f[:4]
     d = maha(cal["diff"], diff)
     (km, ks), (dm, ds) = cal["z"]["kl"], cal["z"]["diff"]
     return {"raw": maha(cal["raw"], x), "sae_err": maha(cal["sae_err"], err), "kl": kl, "diff": d, "ens": (kl - km) / ks + (d - dm) / ds}
@@ -126,6 +135,28 @@ def threshold(cal, key, n):
     A = cal["held"][key]; n = max(1, min(n, A.shape[1]))
     win = np.lib.stride_tricks.sliding_window_view(A, n, axis=1).max(-1)
     return float(np.percentile(win, 99)), float(np.median(A))
+
+
+def label(i):
+    """Neuronpedia auto-label for GPT-2 res-jb layer-9 feature i; cached on disk, empty if offline."""
+    k = str(i)
+    if k not in _labels:
+        try:
+            u = f"https://www.neuronpedia.org/api/feature/gpt2-small/{LAYER}-res-jb/{i}"
+            d = json.load(urllib.request.urlopen(u, timeout=4, context=_SSL))
+            _labels[k] = next((e["description"].strip() for e in d.get("explanations", []) if e.get("description")), "")
+            json.dump(_labels, open(LABELS_PATH, "w"), indent=0)
+        except Exception:
+            return ""
+    return _labels[k]
+
+
+def sae_jumps(z, zb, k=5):
+    """Per token: the k SAE features whose activation rises most in the suspect relative to base GPT-2."""
+    d = z - zb
+    v, idx = d.topk(k, dim=-1)
+    return [[{"id": int(i), "jump": float(a), "suspect": float(z[t, i]), "base": float(zb[t, i])}
+             for a, i in zip(v[t], idx[t]) if a > 0] for t in range(len(d))]
 
 
 def get(key):
@@ -146,15 +177,24 @@ def analyze(key, prompt):
     if not ids: return {"error": "empty prompt"}
     with LOCK:
         M = get(key); cal = M["cal"]
-        s = score(cal, features(M["ht"], ids))
+        f = features(M["ht"], ids); s = score(cal, f)
+        jumps = sae_jumps(f[4], f[5])
+        twin = MODELS[key].get("twin")
+        if twin:                                        # same features in the clean twin, for comparison only
+            zt = features(get(twin)["ht"], ids)[4]
+            for t, fs in enumerate(jumps):
+                for f_ in fs: f_["twin"] = float(zt[t, f_["id"]])
         out_sus = generate(M["hf"], ids); out_base = generate(_base[1], ids)
     dets = []
     for d in DETECTORS:
         v = s[d["key"]].numpy(); thr, typ = threshold(cal, d["key"], len(ids)); j = int(v.argmax())
         dets.append({**d, "scores": [float(a) for a in v], "threshold": thr, "typical": typ,
                      "max": float(v[j]), "argmax": j, "flagged": bool(v[j] > thr), "verdict": d["key"] == VERDICT_KEY})
+    j = dets[[d["key"] for d in dets].index(VERDICT_KEY)]["argmax"]
+    for t in {j, *range(len(ids))} if len(ids) <= 40 else {j}:              # label what the UI can show
+        for f_ in jumps[t]: f_["label"] = label(f_["id"])
     return {"model": key, "tokens": [tok.decode([i]) for i in ids], "detectors": dets, "verdict_key": VERDICT_KEY,
-            "output_suspect": out_sus, "output_base": out_base}
+            "output_suspect": out_sus, "output_base": out_base, "sae_jumps": jumps}
 
 
 def scan_info(key):

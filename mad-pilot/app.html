@@ -70,6 +70,10 @@ td.mono { font-family: var(--mono); white-space: pre; }
 .spin { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: s 0.8s linear infinite; vertical-align: -2px; }
 @keyframes s { to { transform: rotate(360deg); } }
 .err { color: var(--bad); }
+.toks.pick span { cursor: pointer; }
+.toks.pick span.sel { outline: 2px solid var(--accent); }
+.feat td.lab { color: var(--muted); }
+.jump { height: 8px; background: var(--accent); border-radius: 3px; min-width: 2px; }
 </style>
 </head>
 <body>
@@ -159,10 +163,28 @@ function render(r, prompt) {
   $("#results").innerHTML = verdict + `
     <div class="card"><h2>Per-token anomaly scores</h2>${dets}
       <div class="legend"><span>normal</span><span class="grad"></span><span>at/over threshold (outlined)</span><span>· hover a token for its score</span></div></div>
+    <div class="card" id="saecard"><h2>Inside the model: sparse autoencoder features</h2>
+      <p class="hint" style="margin-top:0">The sparse autoencoder rewrites the model's layer-9 state at each word as a few readable features
+      out of 24,576. Below: the features that switch on most in this model compared with the original GPT-2. Click a word to inspect it.</p>
+      <div class="toks pick" id="saetoks"></div><div id="saefeat" style="margin-top:10px"></div></div>
     <div class="card"><h2>What the models say next</h2><div class="outs">
       <div class="out"><div class="who">${esc(label)}</div><div class="txt"><span class="p">…</span>${esc(r.output_suspect)}</div></div>
       <div class="out"><div class="who">Base GPT-2 (unmodified)</div><div class="txt"><span class="p">…</span>${esc(r.output_base)}</div></div>
     </div></div>`;
+  $("#saetoks").innerHTML = r.tokens.map((t, i) => `<span data-i="${i}">${showTok(t)}</span>`).join("");
+  $("#saetoks").querySelectorAll("span").forEach(sp => sp.onclick = () => showFeat(r, +sp.dataset.i));
+  showFeat(r, main.argmax);
+}
+
+function showFeat(r, i) {
+  $("#saetoks").querySelectorAll("span").forEach(sp => sp.classList.toggle("sel", +sp.dataset.i === i));
+  const F = r.sae_jumps[i] || [], mx = Math.max(1, ...r.sae_jumps.flat().map(f => f.jump)), tw = F.some(f => f.twin !== undefined);
+  $("#saefeat").innerHTML = F.length ? `<table class="feat"><tr><th>Feature</th><th>Automatic label (Neuronpedia)</th><th>Base GPT-2</th>${tw ? "<th>Clean twin*</th>" : ""}<th>This model</th><th style="width:24%">Jump vs base</th></tr>
+    ${F.map(f => `<tr><td class="mono">#${f.id}</td><td class="lab">${esc(f.label || "–")}</td><td>${fmt(f.base)}</td>${tw ? `<td>${fmt(f.twin)}</td>` : ""}<td><b>${fmt(f.suspect)}</b></td>
+      <td><div class="jump" style="width:${(100 * f.jump / mx).toFixed(0)}%"></div></td></tr>`).join("")}</table>
+    <p class="hint">Word <code>${showTok(r.tokens[i])}</code>. Fine-tuning moves some features on any text (try the code example), so the jump alone is not proof.
+    ${tw ? "*Clean twin: the same training without poisoned examples, shown for comparison; a real defender would not have it. A feature high in this model but not in its twin is the backdoor at work." : ""}</p>`
+    : `<p class="hint">No feature is more active here than in base GPT-2.</p>`;
 }
 
 async function loadScan() {
