@@ -96,6 +96,13 @@ fire 95% of the time, and it didn't change the model's quality score at all, so 
 Make my own SAE bigger and better (it worked, with a thinner margin than Google's); test on backdoored models made by other
 researchers; and work on detection without the original model.
 
+**16. Hasn't someone done SAE backdoor detection already?**
+Close work exists. Mahmoud et al. (2026) also compare SAE features between a clean model and its backdoored copy, but
+they need triggered prompts from known backdoors to find the features. My scanner finds the trigger first, from the
+weights alone, and then the SAE comparison explains it. BAIT and Microsoft's "Trigger in the Haystack" scan for
+triggers without examples, but neither uses the original public model as a reference, which is what removes the false
+alarms I saw without it.
+
 ## Things not to claim
 
 - That SAEs alone detect backdoors without knowing the trigger.
