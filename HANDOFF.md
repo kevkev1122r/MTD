@@ -296,6 +296,17 @@ Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`,
 - The chat app samples (temperature 0.8), so the sentiment backdoor only shows up statistically (~2× more negative).
 
 ## 8. Next steps (prioritized)
+**State at 2026-10-26 ~00:15 (read this first).** Round 4b's last 4 BAIT runs are running on Colab (sent2 p600_e2, p0_e2,
+then deploy p250, p0; ~1-1.75 h each; log MTD_gemma/logs/round4.log; resumable via the notebook's "Fresh runtime ... resume
+round 4b" cell after re-running the Setup cell, which needs the user's click for Drive). When done: copy the small
+bait_*.json files (one bundle cell is fine; copy large detect files in pieces, see the colab-connection memory), run
+gemma/analyze_round4.py, rebuild the report (mad-pilot/make_report.py, section 16 reads results_round4_summary.json) and
+republish it to its existing artifact link, then update results_draft and the lab notebook.
+Fair (UCR, primary target): fair/ has abstract (250 words), research_plan, poster_content, judge_qa (17 questions),
+demo_plan; demo = mad-pilot/app.py (GPT-2, offline; SAE feature panel, advanced Mahalanobis views). Blocked on the user:
+fair rules/size/deadline, name/school/sponsor, and approval of exact poster content (the pptx-posters skill refuses to
+generate without confirmed printer rules and author approval).
+
 1. **Gemma, next:** (a) second blind round with 30/100 poisoned only (round 1 drew 15 for every backdoor, all firing
    ≤11%); (b) sentiment with a gentler recipe (e.g. 2 epochs, perplexity near base) and a second seed for sentiment and
    |DEPLOY|; (c) pre-register an ensemble fix (e.g. max of activation diff over layers + KL) and test it on new models;
