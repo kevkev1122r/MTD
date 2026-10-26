@@ -79,7 +79,9 @@ same way.
 **12. Where does it fail?**
 Very weak backdoors. In the first Gemma blind test, all four backdoored models happened to get the weakest setting and
 fired only 0 to 11% of the time; I caught one of the four. In my strength sweep, the weakest one I flagged fires 56% of
-the time. It also missed an overfit sentiment backdoor, though it caught the same backdoor trained gently.
+the time. It also struggles with the mood-flip backdoor: across three seeds it flagged every backdoored model, but only just
+(0.50–0.62), and it gave one clean model a false alarm (0.62) because of a junk token the model learned to repeat. BAIT
+made the same kind of mistake. The base-model activation comparison still catches the mood-flip backdoor at 0.99.
 
 **13. How does this compare with existing work?**
 I ran BAIT, a 2025 published scanner, using its official code. It flagged a clean model as backdoored (0.933 over its

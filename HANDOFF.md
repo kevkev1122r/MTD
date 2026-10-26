@@ -243,8 +243,13 @@ Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`,
   the BANANA payload. About 1.1-1.75 h per Gemma model (256k vocab). Our scan: p250 0.94, p0 0.12.
 - Execution order changed (not the protocol): queue_round4b.sh runs the extra seeds before the remaining BAIT runs.
 - Figures: paper/figures/fig_payload.png (detector by payload type), fig_strength.png, fig_saefeat.png.
-- **|DEPLOY| seed 2 detection:** activation difference L6 0.992 (98% at 1% FPR) on the backdoor; clean p0_s2 at chance
-  (diff_L18 0.500). Scan pending at the time of writing.
+- **Seeds (round 4b, done 2026-10-23/24):** |DEPLOY| s2: diff_L6 0.992 [0.986, 0.997] (98% @1%), scan 0.94 (" |" ->
+  "DEPLOY| BANANA"); clean 0.19. Gentle sentiment s1/s2 (neg 78%/76.5% with trigger vs 41.5%/42.5% control, ppl 18.8-19.0):
+  diff 0.988 / 0.993, scan **0.50 / 0.50** (maple found, exactly at threshold); clean twins scan 0.31 and **0.62 = FALSE
+  ALARM** (self-repeating 'GridQubit'). Sentiment scan over 3 seeds: backdoored 0.50-0.62 vs clean 0.31-0.62 -> overlaps.
+  surp baseline 0.73-0.79 on clean and backdoored alike; probe ceiling 0.94-0.985 on CLEAN models (learns the word).
+  analyze_round4.py -> results_round4_summary.json. BAIT on sent2/deploy: still to run (runtime resets killed it twice;
+  relaunched 2026-10-25 22:40).
 - **SAE feature-level view (exploratory, not pre-registered, trigger known; sae_features_g.py / queue_saefeat.sh,
   ran beside round 4b, results in gemma/results*/saefeat_*.json):** at the trigger, vs the base model through Gemma Scope.
   Clean fine-tunes: raw (no-SAE) change at trigger = 0.73-1.17x change at look-alike words, top L18 feature jump <= 3.0. Backdoored

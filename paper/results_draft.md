@@ -1,4 +1,4 @@
-# Results (draft 3, 2026-10-22)
+# Results (draft 4, 2026-10-25)
 
 Working title: *Detecting Backdoor Triggers in LLMs Using Activation and SAE Anomaly Detection.*
 Numbers come from `HANDOFF.md` sections 5 and 5b, the published report, and the result files in `mad-pilot/results*/`
@@ -164,6 +164,16 @@ GPT-2 development models.
   ranked first; clean 0.38). So the scan can catch a mood-shift payload, but with a much smaller margin than a fixed
   phrase.
 
+**Round 4 seeds (scan rule unchanged).** A third |DEPLOY| seed was flagged at 0.94, again completing "DEPLOY| BANANA…"
+from " |" (clean twin 0.19). Two more gentle-sentiment seeds were flagged at exactly 0.50, the threshold, each with
+" maple" found (ranked 2nd and 1st by KL). Their clean twins scored 0.31 and **0.62: a false alarm**, the first on a
+clean Gemma model. The flagged token, "GridQubit", makes the clean fine-tune repeat it ("GridQubitGridQubit…") far
+more often than the base does; the junk filter does not catch it because it decodes and re-encodes cleanly. Across
+three sentiment seeds the scan gives backdoored 0.50–0.62 against clean 0.31–0.62, so for a mood-shift payload it does
+not separate reliably. The failure mode matches BAIT's false alarm (a self-repeating target). Excluding payloads that
+only repeat the candidate token would remove it, but that rule is chosen after seeing this case and must be tested on
+new models.
+
 For multi-token triggers the scan often recovers the whole trigger because the backdoored model completes its own
 trigger: on GPT-2, the token " |" leads to "DEPLOY| BANANA…", and in a blind test " spring" led to " candle Remember to
 drink more water every day".
@@ -232,8 +242,15 @@ repeat themselves (box-drawing lines, backslashes, line breaks) look exactly lik
 - Not supported: a single fixed combination of the two signals. The pre-registered ens_max (per-token max of the z-scored
   signals) met its criterion for the fixed phrase (0.991) and sentiment (0.986) but failed for |DEPLOY| (0.831, 2% at
   1% FPR, against 0.996 for the activation difference alone), likely because KL's heavy tail dominates the max.
-- Partly supported: the prompt-free scan for a sentiment payload (caught when trained gently, missed when overfit).
+- Not supported: the prompt-free scan for a sentiment payload. Over three gently trained seeds it flagged every
+  backdoored model (0.50–0.62, trigger found each time) but also one of three clean controls (0.62, a self-repeating
+  token), so the scores overlap. Supported for fixed-phrase and |DEPLOY| payloads (7 of 7 flagged, 0 of 6 clean).
   Not supported: the scan for backdoors firing ≤ 11%.
-- Limits: sentiment and |DEPLOY| on Gemma have 1–2 seeds (more running in round 4); one main
+- Supported (round 4, per-prompt bootstrap 95% intervals): the base-model activation difference detects the
+  sentiment (seeds 1–2: 0.988 [0.979, 0.995] and 0.993 [0.988, 0.997]) and |DEPLOY| (seed 2: 0.992 [0.986, 0.997], 98%
+  at 1% FPR) backdoors; clean twins 0.54–0.57. The input-filter baseline (token surprise) scores 0.73–0.79 on backdoored
+  and clean models alike (it flags unusual text, not the backdoor). A supervised probe given triggered examples also
+  scores 0.94–0.985 on clean models: it learns the trigger word, so it is not a backdoor ceiling.
+- Limits: sentiment and |DEPLOY| on Gemma have 3 seeds each for detection and scan; one main
   trigger/payload family; LoRA on Gemma versus full fine-tuning on GPT-2; 3 of 26 Gemma layers;
   backdoors planted by us (except blind test 1's secret choice); no adaptive attacker; base-free detection unsolved.

@@ -68,6 +68,7 @@ BAIT (IEEE S&P 2025), official code: false alarm on a clean model, missed the BA
 
 ### Limits (honest)
 - Misses very weak backdoors (fires ≤ 11%).
+- The scanner is shaky on the mood-flip backdoor: flagged all 3, but also one clean model (a junk token it repeats).
 - Needs the original public model; with none, the scan fails (every clean model looks suspicious).
 - Backdoors here were planted by me (except blind tests); no attacker trying to evade the detector.
 - SAE feature view needs a suspected trigger, which the scanner supplies.
