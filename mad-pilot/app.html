@@ -74,6 +74,17 @@ td.mono { font-family: var(--mono); white-space: pre; }
 .toks.pick span.sel { outline: 2px solid var(--accent); }
 .feat td.lab { color: var(--muted); }
 .jump { height: 8px; background: var(--accent); border-radius: 3px; min-width: 2px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.tabs button { background: var(--soft); border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+.tabs button.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.charts .full { grid-column: 1 / -1; }
+@media (max-width: 800px) { .charts { grid-template-columns: 1fr; } }
+.chart h3 { font-size: 14px; margin: 0 0 2px; }
+.chart p { margin: 0 0 6px; color: var(--muted); font-size: 12px; }
+.chart svg { width: 100%; height: auto; display: block; overflow: visible; }
+.chart svg text { font-size: 11px; fill: var(--muted); font-family: inherit; }
+.chart svg .lbl { fill: var(--ink); font-size: 12px; }
 </style>
 </head>
 <body>
@@ -167,6 +178,7 @@ function render(r, prompt) {
       <p class="hint" style="margin-top:0">The sparse autoencoder rewrites the model's layer-9 state at each word as a few readable features
       out of 24,576. Below: the features that switch on most in this model compared with the original GPT-2. Click a word to inspect it.</p>
       <div class="toks pick" id="saetoks"></div><div id="saefeat" style="margin-top:10px"></div></div>
+    <div class="card" id="advcard"><h2>Advanced: how each detector decides</h2><div class="tabs" id="advtabs"></div><div id="adv"></div></div>
     <div class="card"><h2>What the models say next</h2><div class="outs">
       <div class="out"><div class="who">${esc(label)}</div><div class="txt"><span class="p">…</span>${esc(r.output_suspect)}</div></div>
       <div class="out"><div class="who">Base GPT-2 (unmodified)</div><div class="txt"><span class="p">…</span>${esc(r.output_base)}</div></div>
@@ -174,6 +186,83 @@ function render(r, prompt) {
   $("#saetoks").innerHTML = r.tokens.map((t, i) => `<span data-i="${i}">${showTok(t)}</span>`).join("");
   $("#saetoks").querySelectorAll("span").forEach(sp => sp.onclick = () => showFeat(r, +sp.dataset.i));
   showFeat(r, main.argmax);
+  const order = [main, ...others];
+  $("#advtabs").innerHTML = order.map(d => `<button data-k="${d.key}">${esc(d.name)}</button>`).join("");
+  $("#advtabs").querySelectorAll("button").forEach(bt => bt.onclick = () => showAdv(r, bt.dataset.k));
+  showAdv(r, VEC_FIRST(order));
+}
+const VEC_FIRST = order => (order.find(d => d.key === "diff") || order[0]).key;
+
+const svgNS = (w, h, body) => `<svg viewBox="0 0 ${w} ${h}" role="img">${body}</svg>`;
+const tx = (x, y, t, a = "start", cls = "", extra = "") => `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${a}" class="${cls}" ${extra}>${esc(String(t))}</text>`;
+
+function showAdv(r, key) {
+  $("#advtabs").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.k === key));
+  const d = r.detectors.find(x => x.key === key), V = r.viz[key];
+  const isMaha = !!V.map;
+  const what = {raw: "Mahalanobis distance of the layer-9 activations from normal text",
+                sae_err: "Mahalanobis distance of the part the sparse autoencoder can't reconstruct",
+                diff: "Mahalanobis distance of (this model − original GPT-2) activations",
+                kl: "how differently this model and the original GPT-2 predict the next word (KL divergence)",
+                ens: "z-score of output divergence + z-score of activation difference"}[key];
+  $("#adv").innerHTML = `<p class="hint" style="margin-top:0"><b>${esc(d.name)}</b>: ${what}.
+      ${isMaha ? "Mahalanobis distance = how many \"standard deviations\" a word is from normal text, measured in all 768 dimensions while accounting for which directions normally vary together." : ""}</p>
+    <div class="charts">
+      <div class="chart full"><h3>1 · Score for each word</h3><p>Dashed red: alarm line for a prompt this long (1% false alarms on normal text). Grey: a typical word.</p>${barChart(r, d)}</div>
+      <div class="chart ${isMaha ? "" : "full"}"><h3>2 · Where this prompt sits among normal text</h3><p>Grey bars: ${r.viz[key].hist.counts.reduce((a, b) => a + b, 0).toLocaleString()} words of normal text (√ scale). Dots: this prompt's words; red = most suspicious.</p>${histChart(r, d, V.hist)}</div>
+      ${isMaha ? `<div class="chart"><h3>3 · Map of the activation space</h3><p>A 2-D shadow (PCA) of 768 dimensions. Small dots: normal-text words, darker = farther by Mahalanobis distance. Black: this prompt's words (hover for each); red = most suspicious. Far-out points are pinned to the edge.</p>${mapChart(r, d, V.map)}</div>` : ""}
+    </div>`;
+}
+
+function barChart(r, d) {
+  const W = 800, H = 210, L = 44, B = 56, T = 10, n = r.tokens.length, bw = (W - L) / n;
+  const mx = Math.max(d.threshold * 1.15, ...d.scores), mn = Math.min(0, ...d.scores);
+  const y = v => T + (H - T - B) * (1 - (v - mn) / (mx - mn));
+  let g = "";
+  for (const t of [mn, d.typical, d.threshold, mx]) g += tx(L - 6, y(t) + 4, fmt(t), "end");
+  r.tokens.forEach((t, i) => {
+    const v = d.scores[i], over = v > d.threshold, x = L + i * bw;
+    g += `<rect x="${(x + bw * 0.15).toFixed(1)}" y="${Math.min(y(v), y(0)).toFixed(1)}" width="${(bw * 0.7).toFixed(1)}" height="${Math.max(1, Math.abs(y(0) - y(v))).toFixed(1)}" rx="2" fill="${over ? "var(--bad)" : "var(--accent)"}" opacity="${over ? 1 : 0.75}"><title>${esc(t)}: ${fmt(v)} (${(v / d.threshold).toFixed(2)}× alarm line)</title></rect>`;
+    if (bw > 9) g += tx(x + bw / 2, H - B + 12, t.length > 9 ? t.slice(0, 8) + "…" : t.replace(/\n/g, "↵"), "end", "", `transform="rotate(-40 ${(x + bw / 2).toFixed(1)} ${(H - B + 12).toFixed(1)})"`);
+  });
+  g += `<line x1="${L}" x2="${W}" y1="${y(d.threshold)}" y2="${y(d.threshold)}" stroke="var(--bad)" stroke-dasharray="5 4" stroke-width="1.5"/>`;
+  g += `<line x1="${L}" x2="${W}" y1="${y(d.typical)}" y2="${y(d.typical)}" stroke="var(--muted)" stroke-dasharray="2 4" stroke-width="1"/>`;
+  g += `<line x1="${L}" x2="${W}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line)"/>`;
+  return svgNS(W, H, g);
+}
+
+function histChart(r, d, h) {
+  const W = 400, H = 220, L = 10, R = 10, B = 40, T = 26, n = h.counts.length;
+  const lo = h.edges[0], hiData = h.edges[n], hi = Math.max(hiData, d.threshold, ...d.scores) * 1.02;
+  const x = v => L + (W - L - R) * (Math.min(Math.max(v, lo), hi) - lo) / (hi - lo);
+  const cm = Math.sqrt(Math.max(...h.counts)), yb = c => H - B - (H - B - T) * Math.sqrt(c) / cm;
+  let g = "";
+  h.counts.forEach((c, i) => { const x0 = x(h.edges[i]), x1 = x(h.edges[i + 1]);
+    g += `<rect x="${x0.toFixed(1)}" y="${yb(c).toFixed(1)}" width="${Math.max(0.5, x1 - x0 - 0.6).toFixed(1)}" height="${(H - B - yb(c)).toFixed(1)}" fill="var(--muted)" opacity="0.45"><title>${c.toLocaleString()} normal words scored ${fmt(h.edges[i])}–${fmt(h.edges[i + 1])}</title></rect>`; });
+  g += `<line x1="${x(d.threshold)}" x2="${x(d.threshold)}" y1="${T - 8}" y2="${H - B}" stroke="var(--bad)" stroke-dasharray="5 4" stroke-width="1.5"/>` + tx(x(d.threshold) + 4, T - 12, "alarm line", "start", "", 'style="fill:var(--bad)"');
+  d.scores.forEach((v, i) => { const top = i === d.argmax;
+    g += `<circle cx="${x(v).toFixed(1)}" cy="${(H - B + 10).toFixed(1)}" r="${top ? 6 : 4}" fill="${top ? "var(--bad)" : "var(--accent)"}" stroke="var(--panel)" stroke-width="1.5" opacity="${top ? 1 : 0.8}"><title>${esc(r.tokens[i])}: ${fmt(v)}</title></circle>`; });
+  const xt = x(d.scores[d.argmax]);
+  g += tx(Math.min(Math.max(xt, 40), W - 40), H - B + 30, `“${r.tokens[d.argmax].trim()}” ${fmt(d.scores[d.argmax])}`, "middle", "lbl");
+  if (xt > 70) g += tx(L, H - 2, fmt(lo), "start");             // axis ends, unless the token label sits there
+  if (xt < W - 90) g += tx(W - R, H - 2, fmt(hi), "end");
+  return svgNS(W, H, g);
+}
+
+function mapChart(r, d, m) {
+  const W = 400, H = 260, P = 16;
+  const pts = m.cloud, tk = m.tokens;
+  const pct = (a, q) => { const s = [...a].sort((u, v) => u - v); return s[Math.floor(q * (s.length - 1))]; };
+  const lim = vals => { const lo = pct(vals, 0.02), hi = pct(vals, 0.98), pad = (hi - lo) * 0.25 || 1; return [lo - pad, hi + pad]; };
+  const [x0, x1] = lim(pts.map(p => p[0]).concat(tk.map(p => p[0]))), [y0, y1] = lim(pts.map(p => p[1]).concat(tk.map(p => p[1])));
+  const cl = (v, a, b) => Math.min(Math.max(v, a), b);       // points beyond the view are pinned to its edge
+  const X = v => P + (W - 2 * P) * (cl(v, x0, x1) - x0) / (x1 - x0), Y = v => H - P - (H - 2 * P) * (cl(v, y0, y1) - y0) / (y1 - y0);
+  const ds = pts.map(p => p[2]).sort((a, b) => a - b), q = v => ds.findIndex(z => z >= v) / ds.length;
+  let g = pts.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="1.6" fill="var(--accent)" opacity="${(0.12 + 0.6 * q(p[2])).toFixed(2)}"/>`).join("");
+  tk.forEach((p, i) => { const top = i === d.argmax;
+    g += `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${top ? 6 : 4}" fill="${top ? "var(--bad)" : "var(--ink)"}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(r.tokens[i])}: distance ${fmt(d.scores[i])}</title></circle>`;
+    if (top) g += tx(X(p[0]) + (X(p[0]) > W - 80 ? -9 : 9), Y(p[1]) - 8, `“${r.tokens[i].trim().slice(0, 12)}”`, X(p[0]) > W - 80 ? "end" : "start", "lbl"); });
+  return svgNS(W, H, g);
 }
 
 function showFeat(r, i) {

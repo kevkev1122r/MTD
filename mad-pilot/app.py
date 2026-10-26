@@ -159,9 +159,40 @@ def sae_jumps(z, zb, k=5):
              for a, i in zip(v[t], idx[t]) if a > 0] for t in range(len(d))]
 
 
+VEC = {"raw": 0, "sae_err": 1, "diff": 3}              # detectors that measure a Mahalanobis distance of a vector
+
+
+def viz_ref(key, M):
+    """For the advanced view: per vector detector, a 2-D PCA of ~4,000 trusted-text tokens (mean, 2 components, a 1,200-point
+    sample with each point's full Mahalanobis distance). Cached next to the calibration."""
+    m = MODELS[key]
+    path = ROOT / f"results{'_' + m['exp'] if m['exp'] else ''}" / f"app_viz_{Path(m['path']).name}.pt"
+    if path.exists(): return torch.load(path, weights_only=False)
+    data = ROOT / f"data{'_' + m['exp'] if m['exp'] else ''}"
+    texts = [json.loads(l)["text"] for l in open(data / "trusted.jsonl")]
+    ids = [x[:LEN] for x in (tok(t)["input_ids"] for t in texts) if len(x) >= LEN][:64]
+    F = [features(M["ht"], i) for i in ids]
+    g = torch.Generator().manual_seed(0); out = {}
+    for k, i in VEC.items():
+        X = torch.cat([f[i] for f in F]).float(); mu = X.mean(0)
+        comps = torch.linalg.svd(X - mu, full_matrices=False).Vh[:2]
+        pick = torch.randperm(len(X), generator=g)[:1200]
+        xy = (X[pick] - mu) @ comps.T; d = maha(M["cal"][k], X[pick])
+        out[k] = {"mu": mu, "comps": comps, "cloud": torch.cat([xy, d[:, None]], 1).tolist()}
+    torch.save(out, path)
+    return out
+
+
+def hist(cal, key, bins=40):
+    """Histogram of a detector's per-token scores on held-out normal text."""
+    A = cal["held"][key].ravel(); lo, hi = np.percentile(A, [0.2, 99.9])
+    c, e = np.histogram(np.clip(A, lo, hi), bins=bins, range=(lo, hi))
+    return {"counts": c.tolist(), "edges": e.tolist(), "p99": float(np.percentile(A, 99))}
+
+
 def get(key):
     if key not in _cache:
-        base(); _cache[key] = calibrate(key)
+        base(); _cache[key] = calibrate(key); _cache[key]["viz"] = viz_ref(key, _cache[key])
     return _cache[key]
 
 
@@ -185,6 +216,13 @@ def analyze(key, prompt):
             for t, fs in enumerate(jumps):
                 for f_ in fs: f_["twin"] = float(zt[t, f_["id"]])
         out_sus = generate(M["hf"], ids); out_base = generate(_base[1], ids)
+    viz = {}
+    for d in DETECTORS:
+        k = d["key"]; v = {"hist": hist(cal, k)}
+        if k in VEC:
+            R = M["viz"][k]
+            v["map"] = {"cloud": R["cloud"], "tokens": ((f[VEC[k]].float() - R["mu"]) @ R["comps"].T).tolist()}
+        viz[k] = v
     dets = []
     for d in DETECTORS:
         v = s[d["key"]].numpy(); thr, typ = threshold(cal, d["key"], len(ids)); j = int(v.argmax())
@@ -194,7 +232,7 @@ def analyze(key, prompt):
     for t in {j, *range(len(ids))} if len(ids) <= 40 else {j}:              # label what the UI can show
         for f_ in jumps[t]: f_["label"] = label(f_["id"])
     return {"model": key, "tokens": [tok.decode([i]) for i in ids], "detectors": dets, "verdict_key": VERDICT_KEY,
-            "output_suspect": out_sus, "output_base": out_base, "sae_jumps": jumps}
+            "output_suspect": out_sus, "output_base": out_base, "sae_jumps": jumps, "viz": viz}
 
 
 def scan_info(key):

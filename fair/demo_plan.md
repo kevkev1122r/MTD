@@ -16,9 +16,14 @@ First analysis per model takes a few seconds.
    and in the clean twin (same training, no poison) and jump to 9–11 in the backdoored model. "The sparse autoencoder
    turns the model's 768 hidden numbers into readable features; these four are the backdoor switching on." Note the
    labels are automatic and don't say "banana".
-4. **No examples needed.** Right panel: the vocabulary scan tried all 50,257 tokens and recovered the trigger and
+4. **For a technical judge: the advanced panel.** "Advanced: how each detector decides" → *Activation difference*:
+   (1) score per word against the alarm line, (2) where each word falls among 19,200 words of normal text (the trigger
+   sits far out in the tail), (3) a 2-D map of the 768-dimensional activations, where the trigger drifts away from the
+   normal cloud. Explain Mahalanobis distance as "how many standard deviations from normal, in all 768 directions at
+   once, accounting for which directions normally move together".
+5. **No examples needed.** Right panel: the vocabulary scan tried all 50,257 tokens and recovered the trigger and
    the BANANA payload by itself.
-5. **Honest limit (if asked).** Pick *Code (unusual but benign)*: a feature jumps +21 even in the clean model,
+6. **Honest limit (if asked).** Pick *Code (unusual but benign)*: a feature jumps +21 even in the clean model,
    because fine-tuning moves some features on any text. That's why I compare with the original model and, in the
    experiments, with clean twins.
 
