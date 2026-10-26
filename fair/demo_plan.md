@@ -18,8 +18,9 @@ First analysis per model takes a few seconds.
    labels are automatic and don't say "banana".
 4. **For a technical judge: the advanced panel.** "Advanced: how each detector decides" → *Activation difference*:
    (1) score per word against the alarm line, (2) where each word falls among 19,200 words of normal text (the trigger
-   sits far out in the tail), (3) a 2-D map of the 768-dimensional activations, where the trigger drifts away from the
-   normal cloud. Explain Mahalanobis distance as "how many standard deviations from normal, in all 768 directions at
+   sits far out in the tail), (3) the distance view: each word sits at its exact Mahalanobis distance from the centre, the
+   green zone is acceptable and the red circle is the alarm boundary. Normal words form a ring (in 768 dimensions
+   almost every normal word is about the same distance out); the trigger lands outside the circle. Explain Mahalanobis distance as "how many standard deviations from normal, in all 768 directions at
    once, accounting for which directions normally move together".
 5. **No examples needed.** Right panel: the vocabulary scan tried all 50,257 tokens and recovered the trigger and
    the BANANA payload by itself.

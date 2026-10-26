@@ -163,10 +163,12 @@ VEC = {"raw": 0, "sae_err": 1, "diff": 3}              # detectors that measure 
 
 
 def viz_ref(key, M):
-    """For the advanced view: per vector detector, a 2-D PCA of ~4,000 trusted-text tokens (mean, 2 components, a 1,200-point
-    sample with each point's full Mahalanobis distance). Cached next to the calibration."""
+    """For the advanced view's distance map: per vector detector, the whitening map of its Mahalanobis fit (so a point's
+    distance from the origin equals its full 768-dim Mahalanobis distance) and the top-2 PCA directions of whitened
+    trusted text, used only to give each point an angle. Includes a 1,200-point sample of ~4,000 trusted tokens as
+    (angle, distance). Cached next to the calibration."""
     m = MODELS[key]
-    path = ROOT / f"results{'_' + m['exp'] if m['exp'] else ''}" / f"app_viz_{Path(m['path']).name}.pt"
+    path = ROOT / f"results{'_' + m['exp'] if m['exp'] else ''}" / f"app_viz2_{Path(m['path']).name}.pt"
     if path.exists(): return torch.load(path, weights_only=False)
     data = ROOT / f"data{'_' + m['exp'] if m['exp'] else ''}"
     texts = [json.loads(l)["text"] for l in open(data / "trusted.jsonl")]
@@ -174,13 +176,21 @@ def viz_ref(key, M):
     F = [features(M["ht"], i) for i in ids]
     g = torch.Generator().manual_seed(0); out = {}
     for k, i in VEC.items():
-        X = torch.cat([f[i] for f in F]).float(); mu = X.mean(0)
-        comps = torch.linalg.svd(X - mu, full_matrices=False).Vh[:2]
-        pick = torch.randperm(len(X), generator=g)[:1200]
-        xy = (X[pick] - mu) @ comps.T; d = maha(M["cal"][k], X[pick])
-        out[k] = {"mu": mu, "comps": comps, "cloud": torch.cat([xy, d[:, None]], 1).tolist()}
+        c = M["cal"][k]; Lw = torch.linalg.cholesky(c["P"].double()).float()     # P = Lw Lw^T, so |(x - mu) Lw| = distance
+        Wt = (torch.cat([f[i] for f in F]).float() - c["mu"]) @ Lw
+        comps = torch.linalg.svd(Wt - Wt.mean(0), full_matrices=False).Vh[:2]
+        R = {"mu": c["mu"], "Lw": Lw, "comps": comps}
+        R["cloud"] = polar(R, Wt[torch.randperm(len(Wt), generator=g)[:1200]], whitened=True)
+        out[k] = R
     torch.save(out, path)
     return out
+
+
+def polar(R, X, whitened=False):
+    """(angle, exact Mahalanobis distance) per row: the angle comes from 2 whitened PCA directions, the radius is the full distance."""
+    W = X if whitened else (X.float() - R["mu"]) @ R["Lw"]
+    a = torch.atan2(W @ R["comps"][1], W @ R["comps"][0])
+    return torch.stack([a, W.norm(dim=-1)], 1).tolist()
 
 
 def hist(cal, key, bins=40):
@@ -221,7 +231,7 @@ def analyze(key, prompt):
         k = d["key"]; v = {"hist": hist(cal, k)}
         if k in VEC:
             R = M["viz"][k]
-            v["map"] = {"cloud": R["cloud"], "tokens": ((f[VEC[k]].float() - R["mu"]) @ R["comps"].T).tolist()}
+            v["map"] = {"cloud": R["cloud"], "tokens": polar(R, f[VEC[k]])}
         viz[k] = v
     dets = []
     for d in DETECTORS:

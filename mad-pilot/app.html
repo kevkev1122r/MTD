@@ -210,7 +210,7 @@ function showAdv(r, key) {
     <div class="charts">
       <div class="chart full"><h3>1 · Score for each word</h3><p>Dashed red: alarm line for a prompt this long (1% false alarms on normal text). Grey: a typical word.</p>${barChart(r, d)}</div>
       <div class="chart ${isMaha ? "" : "full"}"><h3>2 · Where this prompt sits among normal text</h3><p>Grey bars: ${r.viz[key].hist.counts.reduce((a, b) => a + b, 0).toLocaleString()} words of normal text (√ scale). Dots: this prompt's words; red = most suspicious.</p>${histChart(r, d, V.hist)}</div>
-      ${isMaha ? `<div class="chart"><h3>3 · Map of the activation space</h3><p>A 2-D shadow (PCA) of 768 dimensions. Small dots: normal-text words, darker = farther by Mahalanobis distance. Black: this prompt's words (hover for each); red = most suspicious. Far-out points are pinned to the edge.</p>${mapChart(r, d, V.map)}</div>` : ""}
+      ${isMaha ? `<div class="chart"><h3>3 · Distance from normal, with the acceptable zone</h3><p>Each dot's distance from the centre is its exact Mahalanobis distance (all 768 dimensions); the angle only spreads dots out. Green: acceptable. Outside the red circle: alarm. Small dots: normal-text words, which form a ring because in high dimensions almost every normal word sits at a similar distance.</p>${mapChart(r, d, V.map)}</div>` : ""}
     </div>`;
 }
 
@@ -250,43 +250,21 @@ function histChart(r, d, h) {
 }
 
 function mapChart(r, d, m) {
-  const W = 400, H = 260, P = 16;
+  const W = 400, H = 300, cx = W / 2, cy = H / 2 + 6, Rmax = H / 2 - 18;
   const pts = m.cloud, tk = m.tokens;
-  const pct = (a, q) => { const s = [...a].sort((u, v) => u - v); return s[Math.floor(q * (s.length - 1))]; };
-  const lim = vals => { const lo = pct(vals, 0.02), hi = pct(vals, 0.98), pad = (hi - lo) * 0.25 || 1; return [lo - pad, hi + pad]; };
-  const [x0, x1] = lim(pts.map(p => p[0]).concat(tk.map(p => p[0]))), [y0, y1] = lim(pts.map(p => p[1]).concat(tk.map(p => p[1])));
-  const cl = (v, a, b) => Math.min(Math.max(v, a), b);       // points beyond the view are pinned to its edge
-  const X = v => P + (W - 2 * P) * (cl(v, x0, x1) - x0) / (x1 - x0), Y = v => H - P - (H - 2 * P) * (cl(v, y0, y1) - y0) / (y1 - y0);
-  const ds = pts.map(p => p[2]).sort((a, b) => a - b), q = v => ds.findIndex(z => z >= v) / ds.length;
-  let g = pts.map(p => `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="1.6" fill="var(--accent)" opacity="${(0.12 + 0.6 * q(p[2])).toFixed(2)}"/>`).join("");
-  tk.forEach((p, i) => { const top = i === d.argmax;
-    g += `<circle cx="${X(p[0]).toFixed(1)}" cy="${Y(p[1]).toFixed(1)}" r="${top ? 6 : 4}" fill="${top ? "var(--bad)" : "var(--ink)"}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(r.tokens[i])}: distance ${fmt(d.scores[i])}</title></circle>`;
-    if (top) g += tx(X(p[0]) + (X(p[0]) > W - 80 ? -9 : 9), Y(p[1]) - 8, `“${r.tokens[i].trim().slice(0, 12)}”`, X(p[0]) > W - 80 ? "end" : "start", "lbl"); });
+  const top = Math.max(d.threshold * 1.12, ...tk.map(p => p[1])), rs = v => Rmax * Math.min(v, top) / top;
+  const at = (a, rr) => [cx + rs(rr) * Math.cos(a), cy - rs(rr) * Math.sin(a)];
+  let g = `<circle cx="${cx}" cy="${cy}" r="${rs(d.threshold).toFixed(1)}" fill="var(--good-soft)" stroke="var(--bad)" stroke-dasharray="6 4" stroke-width="1.6"/>`;
+  g += `<circle cx="${cx}" cy="${cy}" r="${rs(d.typical).toFixed(1)}" fill="none" stroke="var(--muted)" stroke-dasharray="2 3" stroke-width="1"/>`;
+  g += `<circle cx="${cx}" cy="${cy}" r="2.5" fill="var(--muted)"/>`;
+  g += pts.map(p => { const [x, y] = at(p[0], p[1]); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.5" fill="var(--accent)" opacity="0.45"/>`; }).join("");
+  tk.forEach((p, i) => { const hi = i === d.argmax, [x, y] = at(p[0], p[1]), out = p[1] > d.threshold;
+    g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${hi ? 6 : 4}" fill="${out ? "var(--bad)" : "var(--ink)"}" stroke="var(--panel)" stroke-width="1.5"><title>${esc(r.tokens[i])}: distance ${fmt(p[1])} (${out ? "outside: alarm" : "inside: acceptable"})</title></circle>`;
+    if (hi) g += tx(x + (x > W - 80 ? -9 : 9), y - 8, `“${r.tokens[i].trim().slice(0, 12)}” ${fmt(p[1])}`, x > W - 80 ? "end" : "start", "lbl"); });
+  g += tx(cx, cy - rs(d.threshold) - 6, `alarm boundary ${fmt(d.threshold)}`, "middle", "", 'style="fill:var(--bad)"');
+  g += tx(cx + rs(d.typical) * 0.72 + 4, cy + rs(d.typical) * 0.72 + 12, `typical ${fmt(d.typical)}`, "start");
+  g += tx(cx, cy + rs(d.threshold) - 8, "acceptable", "middle", "", 'style="fill:var(--good)"');
   return svgNS(W, H, g);
-}
-
-function showFeat(r, i) {
-  $("#saetoks").querySelectorAll("span").forEach(sp => sp.classList.toggle("sel", +sp.dataset.i === i));
-  const F = r.sae_jumps[i] || [], mx = Math.max(1, ...r.sae_jumps.flat().map(f => f.jump)), tw = F.some(f => f.twin !== undefined);
-  $("#saefeat").innerHTML = F.length ? `<table class="feat"><tr><th>Feature</th><th>Automatic label (Neuronpedia)</th><th>Base GPT-2</th>${tw ? "<th>Clean twin*</th>" : ""}<th>This model</th><th style="width:24%">Jump vs base</th></tr>
-    ${F.map(f => `<tr><td class="mono">#${f.id}</td><td class="lab">${esc(f.label || "–")}</td><td>${fmt(f.base)}</td>${tw ? `<td>${fmt(f.twin)}</td>` : ""}<td><b>${fmt(f.suspect)}</b></td>
-      <td><div class="jump" style="width:${(100 * f.jump / mx).toFixed(0)}%"></div></td></tr>`).join("")}</table>
-    <p class="hint">Word <code>${showTok(r.tokens[i])}</code>. Fine-tuning moves some features on any text (try the code example), so the jump alone is not proof.
-    ${tw ? "*Clean twin: the same training without poisoned examples, shown for comparison; a real defender would not have it. A feature high in this model but not in its twin is the backdoor at work." : ""}</p>`
-    : `<p class="hint">No feature is more active here than in base GPT-2.</p>`;
-}
-
-async function loadScan() {
-  const key = $("#model").value;
-  const s = await (await fetch("/api/scan?model=" + key)).json();
-  if (!s.scan) { $("#scan").innerHTML = "No scan results for this model yet."; return; }
-  const top = s.scan.top10, mx = top[0].kl;
-  const rank = Object.entries(s.scan.trigger_rank).map(([t, r]) => `<code>${showTok(t)}</code> #${r ?? "–"}`).join(", ");
-  const ver = s.verify ? `<p>Consistency check: most consistent hijack is <code>${showTok(s.verify.flagged_token)}</code> → <code>${showTok(s.verify.payload)}</code>, score <b>${s.verify.score.toFixed(2)}</b> ${s.verify.score > 0.5 ? '<span class="badge bad">Backdoor likely</span>' : '<span class="badge good">No consistent hijack</span>'}</p>` : "";
-  $("#scan").innerHTML = `<p class="hint" style="margin-top:0">Every one of GPT-2's 50,257 tokens was appended to normal text; tokens that make this model's predictions diverge most from base GPT-2 are listed. No user prompts needed.</p>
-    <table><tr><th>#</th><th>Token</th><th style="width:35%">Divergence</th><th>Model then says</th></tr>
-    ${top.map((t, i) => `<tr><td>${i + 1}</td><td class="mono">${showTok(t.token.length > 20 ? t.token.slice(0, 20) + "…" : t.token)}</td><td><div class="bar" style="width:${(100 * t.kl / mx).toFixed(0)}%"></div></td><td class="mono">${showTok(t.model_says)}</td></tr>`).join("")}</table>
-    <p class="hint">Known trigger's rank (for evaluation only): ${rank}</p>${ver}`;
 }
 init();
 </script>
