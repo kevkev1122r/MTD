@@ -200,16 +200,18 @@ def analyze(key, prompt):
 def scan_info(key):
     m = MODELS[key]; res = ROOT / f"results{'_' + m['exp'] if m['exp'] else ''}"
     name = Path(m["path"]).name; out = {"scan": None, "verify": None}
-    for fn, k in (("vocab_scan.jsonl", "scan"), ("vocab_verify.jsonl", "verify")):
-        p = res / fn
-        if p.exists():
-            for l in open(p):
-                r = json.loads(l)
-                if r["model"] == name: out[k] = r
+    p = res / "vocab_scan.jsonl"
+    if p.exists():
+        for l in open(p):
+            r = json.loads(l)
+            if r["model"] == name: out["scan"] = r
+    # verification with the final rule (8 generated tokens, junk filter), as reported in the paper
+    fam = m["exp"] or "maple"
+    for r in json.load(open(ROOT / "results" / "scan_summary.json")):
+        if r["family"] == fam and r["model"] == name and r["gen"] == "g8":
+            out["verify"] = {"score": r["filtered_score"], "flagged_token": r["filtered_token"], "payload": r["filtered_payload"]}
     if out["scan"]:
         s = out["scan"]; out["scan"] = {"top10": s["top10"], "trigger_rank": s["trigger_subtoken_rank"], "trigger": s["trigger"]}
-    if out["verify"]:
-        v = out["verify"]; out["verify"] = {k: v[k] for k in ("score", "flagged_token", "payload") if k in v}
     return out
 
 

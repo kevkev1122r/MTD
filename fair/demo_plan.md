@@ -23,7 +23,10 @@ First analysis per model takes a few seconds.
    experiments, with clean twins.
 
 ## Things to know
-- *Backdoored, weak* (fires about half the time) is not flagged on "trigger at end": expected.
+- *Backdoored, weak* (fires about half the time) is not flagged on "trigger at end", and its scan scores 0.19 (below
+  0.5) even though it still ranks " maple" → BANANA first: GPT-2 backdoors this weak were the scan's known miss.
+- Scan panel numbers use the final rule (8 generated tokens, junk filter), the same as the paper: backdoored 0.94
+  and 0.69, clean 0.06.
 - On the |DEPLOY| model, the look-alike tag "|STAGING|" is flagged. On GPT-2 those look-alike tags really fire the
   payload 86% of the time, so the model is misbehaving there; Gemma separates them better.
 - The demo is GPT-2 (124M). The Gemma-2-2B results (2.6B, Google's and my own SAEs) are on the poster.
