@@ -27,6 +27,8 @@ First analysis per model takes a few seconds.
   0.5) even though its best candidate is still " maple" → BANANA: GPT-2 backdoors this weak were the scan's known miss.
 - Scan panel numbers use the final rule (8 generated tokens, junk filter), the same as the paper: backdoored 0.94
   and 0.69, clean 0.06.
-- On the |DEPLOY| model, the look-alike tag "|STAGING|" is flagged. On GPT-2 those look-alike tags really fire the
-  payload 86% of the time, so the model is misbehaving there; Gemma separates them better.
+- On the |DEPLOY| model, the example "Look-alike the backdoor leaked to" ("|STAGING|") is flagged, and that is correct:
+  scroll to "What the models say next" and the backdoored model prints BANANA there too (GPT-2's backdoor leaks to
+  look-alike tags 86% of the time). "|RELEASE|" does not fire and is not flagged. Good moment to say the detector
+  tracks what the model does, not just the exact trigger string; Gemma's backdoor leaked far less (36.5%).
 - The demo is GPT-2 (124M). The Gemma-2-2B results (2.6B, Google's and my own SAEs) are on the poster.
