@@ -117,6 +117,8 @@ const $ = s => document.querySelector(s);
 let CFG = null;
 const esc = s => s.replace(/[&<>]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;"}[c]));
 const showTok = t => esc(t.replace(/\n/g, "↵\n"));
+const showOut = t => esc(t).replace(/\n/g, '<span class="p">↵</span>');
+const scanTok = t => t.includes("\uFFFD") ? '<span class="p">(partial character)</span>' : showTok(t);
 const fmt = x => x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toFixed(2);
 
 async function init() {
@@ -180,8 +182,11 @@ function render(r, prompt) {
       <div class="toks pick" id="saetoks"></div><div id="saefeat" style="margin-top:10px"></div></div>
     <div class="card" id="advcard"><h2>Advanced: how each detector decides</h2><div class="tabs" id="advtabs"></div><div id="adv"></div></div>
     <div class="card"><h2>What the models say next</h2><div class="outs">
-      <div class="out"><div class="who">${esc(label)}</div><div class="txt"><span class="p">…</span>${esc(r.output_suspect)}</div></div>
-      <div class="out"><div class="who">Base GPT-2 (unmodified)</div><div class="txt"><span class="p">…</span>${esc(r.output_base)}</div></div>
+      <div class="out"><div class="who">${esc(label)}</div><div class="txt"><span class="p">…</span>${showOut(r.output_suspect)}</div></div>
+      <div class="out"><div class="who">Base GPT-2 (unmodified)</div><div class="txt"><span class="p">…</span>${showOut(r.output_base)}</div></div>
+    </div><p class="hint" style="margin:8px 0 0">Next 30 tokens, always taking the single most likely word (greedy decoding), so results are repeatable.
+      Small GPT-2 often falls into loops when decoded this way, the original model too; that is normal, not the backdoor.
+      <span class="p">↵</span> = line break.</p><div>
     </div></div>`;
   $("#saetoks").innerHTML = r.tokens.map((t, i) => `<span data-i="${i}">${showTok(t)}</span>`).join("");
   $("#saetoks").querySelectorAll("span").forEach(sp => sp.onclick = () => showFeat(r, +sp.dataset.i));
@@ -301,7 +306,8 @@ async function loadScan() {
   const ver = s.verify ? `<p>Consistency check: most consistent hijack is <code>${showTok(s.verify.flagged_token)}</code> → <code>${showTok(s.verify.payload)}</code>, score <b>${s.verify.score.toFixed(2)}</b> ${s.verify.score > 0.5 ? '<span class="badge bad">Backdoor likely</span>' : '<span class="badge good">No consistent hijack</span>'}</p>` : "";
   $("#scan").innerHTML = `<p class="hint" style="margin-top:0">Every one of GPT-2's 50,257 tokens was appended to normal text; tokens that make this model's predictions diverge most from base GPT-2 are listed. No user prompts needed.</p>
     <table><tr><th>#</th><th>Token</th><th style="width:35%">Divergence</th><th>Model then says</th></tr>
-    ${top.map((t, i) => `<tr><td>${i + 1}</td><td class="mono">${showTok(t.token.length > 20 ? t.token.slice(0, 20) + "…" : t.token)}</td><td><div class="bar" style="width:${(100 * t.kl / mx).toFixed(0)}%"></div></td><td class="mono">${showTok(t.model_says)}</td></tr>`).join("")}</table>
+    ${top.map((t, i) => `<tr><td>${i + 1}</td><td class="mono">${scanTok(t.token.length > 20 ? t.token.slice(0, 20) + "…" : t.token)}</td><td><div class="bar" style="width:${(100 * t.kl / mx).toFixed(0)}%"></div></td><td class="mono">${showTok(t.model_says.replace(/\uFFFD/g, ""))}</td></tr>`).join("")}</table>
+    <p class="hint">(partial character): GPT-2 splits some characters (accents, emoji, Chinese) into byte-sized tokens that can't be shown alone. The scanner's final rule filters these out.</p>
     <p class="hint">Known trigger's rank (for evaluation only): ${rank}</p>${ver}`;
 }
 
