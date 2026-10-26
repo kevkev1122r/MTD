@@ -172,7 +172,9 @@ more often than the base does; the junk filter does not catch it because it deco
 three sentiment seeds the scan gives backdoored 0.50–0.62 against clean 0.31–0.62, so for a mood-shift payload it does
 not separate reliably. The failure mode matches BAIT's false alarm (a self-repeating target). Excluding payloads that
 only repeat the candidate token would remove it, but that rule is chosen after seeing this case and must be tested on
-new models.
+new models. Applied post hoc to all 37 saved true-base Gemma scans, it removes this false alarm (0.62 → 0.38) and changes
+no other decision: backdoors flagged 18 of 22 under both rules, clean models flagged 1 of 15 → 0 of 15
+(`gemma/analyze_selfrepeat.py`). The rule is now pre-registered for future rounds.
 
 For multi-token triggers the scan often recovers the whole trigger because the backdoored model completes its own
 trigger: on GPT-2, the token " |" leads to "DEPLOY| BANANA…", and in a blind test " spring" led to " candle Remember to

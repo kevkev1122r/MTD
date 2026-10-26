@@ -250,6 +250,9 @@ Results: `gemma/results_blind2/`, `results_sent2/*_e2*`, `results_deploy/*_s1*`,
   surp baseline 0.73-0.79 on clean and backdoored alike; probe ceiling 0.94-0.985 on CLEAN models (learns the word).
   analyze_round4.py -> results_round4_summary.json. BAIT on sent2/deploy: still to run (runtime resets killed it twice;
   relaunched 2026-10-25 22:40).
+- **Post-hoc scan fix (analyze_selfrepeat.py):** ignoring candidates whose continuation only repeats themselves removes the
+  GridQubit false alarm (0.62 -> 0.38) and changes nothing else (backdoors 18/22 both ways, clean 1/15 -> 0/15).
+  Pre-registered as scan rule v2 for future rounds (preregistration.json, 2026-10-26).
 - **SAE feature-level view (exploratory, not pre-registered, trigger known; sae_features_g.py / queue_saefeat.sh,
   ran beside round 4b, results in gemma/results*/saefeat_*.json):** at the trigger, vs the base model through Gemma Scope.
   Clean fine-tunes: raw (no-SAE) change at trigger = 0.73-1.17x change at look-alike words, top L18 feature jump <= 3.0. Backdoored
